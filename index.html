@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cổng Dự Án 2.0 — Trao quyền phát triển hàng hóa | Sakuko</title>
+<style>
+  :root{
+    --red:#c8102e; --red-d:#9e0c24; --ink:#1d2129; --muted:#6b7280;
+    --line:#e6e8eb; --bg:#f5f6f8; --card:#fff; --ok:#16a34a; --warn:#d97706; --sky:#2563eb;
+    --radius:14px; --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  a{color:var(--red)}
+  .hide{display:none!important}
+  button{font-family:inherit;cursor:pointer}
+
+  /* ---------- LOGIN ---------- */
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(135deg,#c8102e 0%,#7a0a1c 100%)}
+  .login-card{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:400px;padding:34px 30px}
+  .login-card h1{font-size:20px;margin:0 0 4px}
+  .login-card .sub{color:var(--muted);font-size:13px;margin-bottom:22px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .brand .logo{width:40px;height:40px;border-radius:10px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+  .brand b{font-size:15px}
+  label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
+  input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;background:#fff}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red)}
+  .btn{background:var(--red);color:#fff;border:0;border-radius:10px;padding:12px;font-weight:700;font-size:15px;width:100%;margin-top:18px}
+  .btn:hover{background:var(--red-d)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);width:auto;padding:8px 14px;margin:0;font-size:13px}
+  .btn.sm{width:auto;padding:9px 16px;margin:0;font-size:13px}
+  .err{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+  .hint{background:#fff5f6;border:1px solid #f3d3d8;border-radius:10px;padding:10px 12px;font-size:12px;color:#7a1223;margin-top:16px}
+
+  /* ---------- APP SHELL ---------- */
+  header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .head-in{max-width:1080px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px}
+  .head-in .logo{width:34px;height:34px;border-radius:9px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+  .head-in .t{font-weight:800;font-size:15px;line-height:1.2}
+  .head-in .t small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+  .head-in .who{margin-left:auto;text-align:right;font-size:12px;color:var(--muted)}
+  .head-in .who b{color:var(--ink);font-size:13px}
+  nav{max-width:1080px;margin:0 auto;padding:0 10px;display:flex;gap:2px;overflow-x:auto}
+  nav button{background:none;border:0;padding:13px 14px;font-size:14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+  nav button.active{color:var(--red);border-color:var(--red)}
+  main{max-width:1080px;margin:0 auto;padding:22px 18px 60px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .card h2{margin:0 0 4px;font-size:17px}
+  .card h3{margin:18px 0 8px;font-size:15px}
+  .lead{color:var(--muted);font-size:13.5px;margin:0 0 6px}
+  ul.clean{margin:8px 0;padding-left:20px}
+  ul.clean li{margin:5px 0}
+  .pill{display:inline-block;background:#fdeef0;color:var(--red);font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;margin-right:6px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}.head-in .t small{display:none}}
+
+  .phase{border-left:3px solid var(--red);padding:2px 0 2px 14px;margin:14px 0}
+  .phase .p-h{font-weight:800;font-size:14px}
+  .phase .p-date{color:var(--muted);font-size:12px;font-weight:600}
+
+  .mod{border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+  .mod .m-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .mod .code{background:var(--red);color:#fff;font-weight:800;font-size:12px;padding:3px 8px;border-radius:7px}
+  .mod .m-title{font-weight:800;font-size:15px}
+  .mod .m-meta{color:var(--muted);font-size:12px;margin-left:auto}
+  .badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:100px}
+  .badge.todo{background:#f1f2f4;color:#6b7280}
+  .badge.doing{background:#fef3c7;color:#92400e}
+  .badge.done{background:#dcfce7;color:#166534}
+  .badge.dead{background:#fee2e2;color:#991b1b}
+
+  .tbl-wrap{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
+  th,td{border:1px solid var(--line);padding:9px 10px;text-align:left}
+  th{background:#fafafa;font-size:12px}
+  td.st{text-align:center;font-size:16px}
+
+  .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .note{background:#eff6ff;border:1px solid #dbeafe;color:#1e40af;border-radius:10px;padding:11px 13px;font-size:12.5px;margin-top:10px}
+  .field-help{font-size:12px;color:var(--muted);margin:-2px 0 0}
+  .rp-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0}
+  .stat{background:#fafafb;border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:center}
+  .stat .s-n{font-size:22px;font-weight:800;line-height:1.1}
+  .stat .s-l{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .rp-ctrls{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .rp-ctrls select,.rp-ctrls input{width:auto;flex:1;min-width:150px}
+  .warn-card{border-color:#f1b4b4;background:#fff7f7}
+  .warn-card h2{color:#b91c1c}
+  .warn-card .risk-v{color:#b91c1c;font-size:15px}
+  .sv-grid{margin-top:10px;display:grid;gap:8px;font-size:13.5px}
+  .sv-grid .sv-k{font-weight:700;color:var(--ink)}
+  .sv-grid .sv-act{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:9px 11px}
+  #svQ{margin-bottom:2px}
+  .sub-list .s-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
+  .sub-list .s-item b{color:var(--red)}
+  dialog{border:0;border-radius:16px;padding:0;max-width:560px;width:calc(100% - 28px);box-shadow:0 30px 80px rgba(0,0,0,.35)}
+  .dlg-h{padding:16px 20px;border-bottom:1px solid var(--line);font-weight:800;display:flex;align-items:center;gap:10px}
+  .dlg-b{padding:18px 20px;max-height:66vh;overflow:auto}
+  .dlg-f{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+</style>
+</head>
+<body>
+
+<!-- ============ GỐC: khung đăng nhập + app + hộp thoại ============ -->
+<div id="login">
+  <div class="login-card">
+    <div class="brand"><div class="logo">S</div><b>Sakuko · Dự Án 2.0</b></div>
+    <h1>Cổng Trao Quyền Phát Triển Hàng Hóa</h1>
+    <div class="sub">Đăng nhập bằng tài khoản Quản lý cửa hàng để xem và thực thi dự án.</div>
+    <label>Tài khoản</label>
+    <input id="u" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="vd: mandarin">
+    <label>Mật khẩu</label>
+    <input id="p" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="••••••">
+    <button class="btn" onclick="doLogin()">Đăng nhập</button>
+    <div class="err" id="loginErr"></div>
+    <div class="hint">Chưa có tài khoản? Liên hệ chị Thùy (GĐVH) để được cấp. Tài khoản demo: <b>admin / sakuko</b></div>
+  </div>
+</div>
+
+<div id="app" class="hide">
+  <header>
+    <div class="head-in">
+      <div class="logo">S</div>
+      <div class="t">Dự Án 2.0 — Trao quyền phát triển hàng hóa<small>Nhân bản Giai đoạn 4 · Nhóm 5 cửa hàng tiếp theo</small></div>
+      <div class="who"><b id="whoName">—</b><br><span id="whoStore">—</span> · <a href="#" onclick="logout();return false">Thoát</a></div>
+    </div>
+    <nav id="nav"></nav>
+  </header>
+  <main id="view"></main>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg-h"><span id="dlgTitle">Nộp module</span></div>
+  <div class="dlg-b" id="dlgBody"></div>
+  <div class="dlg-f">
+    <button class="btn ghost" onclick="dlg.close()">Hủy</button>
+    <button class="btn sm" onclick="submitModule()">Lưu &amp; Nộp</button>
+  </div>
+</dialog>
+
+<!-- ============ Nạp GỐC rồi NHÁNH (thứ tự quan trọng) ============ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>       <!-- cấu hình gốc -->
+<script src="data-hangmoi.js"></script> <!-- dữ liệu bán/tồn -->
+<script src="core.js"></script>         <!-- bộ máy gốc -->
+<!-- các nhánh: mỗi file tự cắm 1 tab vào menu -->
+<script src="tab-home.js"></script>
+<script src="tab-lessons.js"></script>
+<script src="tab-survey.js"></script>
+<script src="tab-report.js"></script>
+<script src="tab-transfer.js"></script>
+<script src="tab-modules.js"></script>
+<script src="tab-progress.js"></script>
+<!-- khởi động -->
+<script>
+  if(store.me) bootApp();
+  $("#p").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
+</script>
+</body>
+</html>
