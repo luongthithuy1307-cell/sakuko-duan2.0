@@ -52,6 +52,23 @@ const store = {
 };
 function statusOf(storeName, moduleId){ return SUBS.some(s=>s.storeName===storeName && s.moduleId===moduleId); }
 
+/* ---- Số liệu hàng mới: ưu tiên đọc LIVE từ Supabase (bảng hangmoi),
+   không có thì dùng file tĩnh data-hangmoi.js làm dự phòng ---- */
+let hmRt=false;
+async function loadHangmoi(){
+  if(!DB.cloud()) return;                         // chưa bật Supabase → giữ window.HANGMOI từ data-hangmoi.js
+  try{
+    const {data,error}=await sb.from("hangmoi").select("payload").eq("id",1).maybeSingle();
+    if(!error && data && data.payload){ window.HANGMOI = data.payload; }
+  }catch(e){ console.warn("loadHangmoi:",e); }
+}
+function hangmoiRealtime(){
+  if(DB.cloud() && !hmRt){
+    hmRt=true;
+    sb.channel("hm-rt").on("postgres_changes",{event:"*",schema:"public",table:"hangmoi"},async()=>{ await loadHangmoi(); if(TAB==="report"||TAB==="transfer") render(); }).subscribe();
+  }
+}
+
 /* ---- Đăng ký tab (mỗi nhánh gọi hàm này để tự cắm vào menu) ---- */
 window.TABS = [];
 function registerTab(def){ window.TABS.push(def); }   // def = {id, label, render}
@@ -83,6 +100,8 @@ async function bootApp(){
   $("#whoStore").textContent=me.storeName;
   $("#nav").innerHTML=window.TABS.map(t=>`<button data-t="${t.id}" onclick="go('${t.id}')">${t.label}</button>`).join("");
   await DB.load();
+  await loadHangmoi();
   DB.realtime(()=>{ if(TAB==="progress"||TAB==="modules") render(); });
+  hangmoiRealtime();
   go(window.TABS[0].id);
 }
