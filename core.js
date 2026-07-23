@@ -97,7 +97,6 @@ async function bootApp(){
   $("#login").classList.add("hide");
   $("#app").classList.remove("hide");
   $("#whoName").textContent=me.name;
-  $("#whoStore").textContent=me.storeName;
   $("#nav").innerHTML=window.TABS.map(t=>`<button data-t="${t.id}" onclick="go('${t.id}')">${t.label}</button>`).join("");
   await DB.load();
   await loadHangmoi();
