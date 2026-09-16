@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vận hành HN Offline — Nhìn thấy trước khi cải tiến</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F6F0E4;
+  --bg-alt: #F1E8D7;
+  --text: #3A2A1E;
+  --text2: #5E4735;
+  --accent: #A2603C;
+  --accent-hover: #7E4526;
+  --border: #C6B39A;
+  --border-light: #D6C8B4;
+  --border-xlight: #E4D8C6;
+  --muted: #8C7660;
+  --muted2: #B3A18B;
+  --muted3: #C0AC92;
+  --font: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: #1a1a1a; overflow: hidden; height: 100%; font-family: var(--font); }
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.slide {
+  position: absolute;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: center center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+  overflow: hidden;
+}
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.slide-counter {
+  position: fixed;
+  bottom: 20px;
+  right: 28px;
+  font: 500 15px/1 var(--font);
+  color: rgba(255,255,255,.45);
+  z-index: 100;
+  letter-spacing: .05em;
+}
+.nav-hint {
+  position: fixed;
+  bottom: 20px;
+  left: 28px;
+  font: 300 13px/1 var(--font);
+  color: rgba(255,255,255,.25);
+  z-index: 100;
+}
+
+/* Slide layouts */
+.s { width: 100%; height: 100%; display: flex; flex-direction: column; font-family: var(--font); color: var(--text); }
+.s-std { padding: 80px 110px 64px; background: var(--bg); gap: 30px; }
+.s-cover { padding: 110px 130px 90px; background: var(--bg); gap: 0; justify-content: space-between; }
+.s-end { padding: 90px 130px 70px; background: var(--bg-alt); gap: 0; justify-content: space-between; }
+.topbar { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border-light); padding-bottom: 18px; }
+.kicker { font-size: 24px; letter-spacing: .3em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.slide-num { font-size: 24px; letter-spacing: .18em; color: var(--muted2); font-weight: 500; }
+h1.title { font-size: 56px; line-height: 1.06; letter-spacing: .055em; text-transform: uppercase; font-weight: 600; }
+h1.title-sm { font-size: 48px; line-height: 1.06; letter-spacing: .055em; text-transform: uppercase; font-weight: 600; }
+h1.title-lg { font-size: 64px; line-height: 1.06; letter-spacing: .055em; text-transform: uppercase; font-weight: 600; }
+h1.title-xl { font-size: 120px; line-height: 1; letter-spacing: .045em; text-transform: uppercase; font-weight: 600; max-width: 1500px; }
+.accent { color: var(--accent); }
+.accent-b { color: var(--accent); font-weight: 600; }
+.body-text { font-size: 23px; line-height: 1.5; color: var(--text2); font-weight: 300; }
+.quote-bar { font-size: 30px; line-height: 1.5; color: var(--text2); font-weight: 300; border-left: 3px solid var(--accent); padding-left: 28px; max-width: 1500px; }
+.row-item { display: flex; align-items: baseline; gap: 36px; padding: 22px 0; border-bottom: 1px solid var(--border-xlight); }
+.row-num { min-width: 64px; font-size: 26px; color: var(--muted3); letter-spacing: .1em; font-weight: 600; }
+.row-label { min-width: 400px; font-size: 27px; font-weight: 600; color: var(--text); }
+.row-desc { font-size: 24px; color: var(--text2); font-weight: 300; line-height: 1.4; }
+.card { display: flex; flex-direction: column; gap: 18px; border: 1px solid var(--border); padding: 34px 38px; }
+.card-alert { border-color: var(--accent); }
+.card-title { font-size: 27px; font-weight: 600; color: var(--text); }
+.card-title-accent { font-size: 27px; font-weight: 600; color: var(--accent); }
+.card-body { font-size: 23px; line-height: 1.5; color: var(--text2); font-weight: 300; }
+
+/* Table */
+.tbl { width: 100%; border-collapse: collapse; font-weight: 300; }
+.tbl th { text-align: left; font-size: 20px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0 20px 14px 0; border-bottom: 1px solid var(--border); }
+.tbl th:first-child { padding-right: 24px; width: 150px; }
+.tbl td { padding: 18px 20px 18px 0; border-bottom: 1px solid var(--border-xlight); color: var(--text2); font-weight: 300; font-size: 22px; line-height: 1.35; }
+.tbl td:first-child { padding-right: 24px; font-weight: 600; letter-spacing: .1em; font-size: 22px; }
+.tbl .cell-accent { color: var(--accent); font-weight: 600; }
+.tbl .cell-dark { color: var(--text); font-weight: 600; }
+.tbl .cell-warn { color: #B84000; font-weight: 600; background: #FFF3E8; padding-left: 8px; padding-right: 8px; }
+
+/* 2N specific */
+.matrix-cell { text-align: center; font-size: 28px; font-weight: 600; }
+.score-high { background: #FDEAE0; color: #A2603C; }
+.score-mid { background: #FFF8F0; color: #8C7660; }
+.score-low { background: var(--bg); color: var(--muted3); }
+
+.footer-note { border-top: 1px solid var(--border-light); padding-top: 22px; font-size: 24px; line-height: 1.5; color: var(--text2); font-weight: 300; }
+.footer-label { letter-spacing: .12em; text-transform: uppercase; font-size: 20px; color: var(--muted); font-weight: 600; }
+
+/* Grid helpers */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 34px 60px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 50px; }
+.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 50px; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-1 { flex: 1; }
+.gap-16 { gap: 16px; }
+.gap-28 { gap: 28px; }
+.gap-38 { gap: 38px; }
+.items-start { align-items: start; }
+.justify-center { justify-content: center; }
+.border-top { border-top: 1px solid var(--border); }
+.pt-20 { padding-top: 20px; }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ========== SLIDE 01 — Bìa ========== -->
+<div class="slide active" data-slide="1">
+<div class="s s-cover">
+  <div style="font-size:24px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);font-weight:500">Buổi đào tạo cấp quản lý</div>
+  <div class="flex-col" style="gap:44px">
+    <h1 class="title-xl">Nhìn thấy trước khi cải tiến</h1>
+    <div style="width:180px;height:1px;background:var(--accent)"></div>
+    <div style="font-size:38px;line-height:1.4;color:var(--text2);font-weight:300">Hệ thống của Vận hành Hà Nội Offline</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid var(--border-light);padding-top:26px">
+    <div style="font-size:28px;color:var(--text);font-weight:500;letter-spacing:.04em">Lường Thị Thùy</div>
+    <div style="font-size:24px;color:var(--muted);font-weight:300;font-style:italic">Khách hàng → Mâm → Đĩa → Dòng chảy → 5L → 2N → Điểm nghẽn</div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 02 — Mâm–Đĩa–Dòng chảy ========== -->
+<div class="slide" data-slide="2">
+<div class="s s-std" style="gap:38px">
+  <div class="topbar">
+    <div class="kicker">Slide 02 · Thống nhất cách hiểu</div>
+    <div class="slide-num">02</div>
+  </div>
+  <h1 class="title-lg">Mâm — Đĩa — Dòng chảy</h1>
+  <div class="flex-1 flex-col" style="align-items:center;justify-content:center;gap:0">
+    <div style="width:1240px;display:flex;align-items:center;gap:56px;border:1px solid var(--border);padding:34px 44px">
+      <div style="min-width:230px;font-size:34px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:var(--text)">Mâm</div>
+      <div style="font-size:29px;line-height:1.4;color:var(--text2)">Kết quả lớn mà phòng ban phải phục vụ cho doanh nghiệp / khách hàng</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center"><div style="width:1px;height:52px;background:var(--border)"></div><div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:11px solid var(--border)"></div></div>
+    <div style="width:1240px;display:flex;align-items:center;gap:56px;border:1px solid var(--border);padding:34px 44px">
+      <div style="min-width:230px;font-size:34px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:var(--text)">Đĩa</div>
+      <div style="font-size:29px;line-height:1.4;color:var(--text2)">Những đầu ra chính phải tạo ra để có được cái mâm đó</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center"><div style="width:1px;height:52px;background:var(--border)"></div><div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:11px solid var(--border)"></div></div>
+    <div style="width:1240px;display:flex;align-items:center;gap:56px;border:1px solid var(--accent);padding:34px 44px">
+      <div style="min-width:230px;font-size:34px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:var(--accent)">Dòng chảy</div>
+      <div style="font-size:29px;line-height:1.4;color:var(--text2)">Sau đó <span class="accent-b">mỗi đĩa mới có dòng chảy riêng</span> để sản xuất ra đầu ra ấy</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 03 — Khách hàng ========== -->
+<div class="slide" data-slide="3">
+<div class="s s-std" style="gap:38px">
+  <div class="topbar">
+    <div class="kicker">Slide 03 · Bước 1 — Khách hàng</div>
+    <div class="slide-num">03</div>
+  </div>
+  <h1 class="title-lg">Vận hành HN Offline phục vụ ai?</h1>
+  <div class="flex-1" style="display:grid;grid-template-columns:1fr 1px 1fr;gap:80px;align-items:start;padding-top:20px">
+    <div class="flex-col gap-28">
+      <div style="font-size:24px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:600">Khách hàng cuối của hệ thống</div>
+      <div class="flex-col" style="gap:22px;font-size:32px;color:var(--text);font-weight:300">
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:18px">BGĐ / Công ty — nhận hiệu quả kinh doanh toàn chuỗi</div>
+        <div>Khách hàng cuối tại cửa hàng — nhận trải nghiệm mua sắm</div>
+      </div>
+    </div>
+    <div style="background:var(--border-light);height:100%"></div>
+    <div class="flex-col gap-28">
+      <div style="font-size:24px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:600">Người nhận output trung gian</div>
+      <div class="flex-col" style="gap:22px;font-size:30px;color:var(--text);font-weight:300">
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:16px">QLST / CH trưởng</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:16px">Nhân viên bán hàng tại CH</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:16px;line-height:1.35">Phòng ban nội bộ — Marketing, KSCL, IT, Ngành hàng, Kế toán, TMĐT, Nhân sự</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:16px">Nhà cung cấp hạng mục thuê</div>
+        <div>Đối tác hội chợ</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 04 — Mâm và 4 đĩa ========== -->
+<div class="slide" data-slide="4">
+<div class="s s-std">
+  <div class="topbar">
+    <div class="kicker">Slide 04 · Bước 2 — Mâm của Vận hành</div>
+    <div class="slide-num">04</div>
+  </div>
+  <h1 class="title">Mâm và 4 đĩa</h1>
+  <div class="quote-bar">Các cửa hàng luôn sẵn sàng phục vụ, khách có trải nghiệm tốt và muốn quay lại, chuỗi hàng Nhật nội địa đạt hiệu quả kinh doanh mục tiêu, và BGĐ nhìn thấy đúng tình trạng vận hành để ra quyết định.</div>
+  <div class="flex-1 flex-col justify-center border-top">
+    <div class="row-item"><div class="row-num">Đĩa 1</div><div class="row-label" style="min-width:400px">Cửa hàng sẵn sàng phục vụ</div><div class="row-desc">Đúng hàng, đủ người, thiết bị và quy trình sẵn sàng.</div></div>
+    <div class="row-item"><div class="row-num">Đĩa 2</div><div class="row-label" style="min-width:400px">Khách trải nghiệm tốt, muốn quay lại</div><div class="row-desc">Khách được phục vụ đúng chuẩn, thuận tiện, nhất quán giữa các CH.</div></div>
+    <div class="row-item"><div class="row-num">Đĩa 3</div><div class="row-label" style="min-width:400px">Điểm bán vận hành hiệu quả</div><div class="row-desc">Từng CH đạt doanh thu, năng suất, chi phí, hao hụt theo mục tiêu giao.</div></div>
+    <div class="row-item"><div class="row-num">Đĩa 4</div><div class="row-label" style="min-width:400px">BGĐ nhìn đúng tình trạng toàn chuỗi</div><div class="row-desc">BGĐ nắm đúng và đủ sớm tình hình DT, CP, hiệu quả từng CH và toàn chuỗi.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 05 — 20 dòng chảy ========== -->
+<div class="slide" data-slide="5">
+<div class="s s-std">
+  <div class="topbar">
+    <div class="kicker">Slide 05 · Toàn cảnh dòng chảy</div>
+    <div class="slide-num">05</div>
+  </div>
+  <h1 class="title">4 đĩa — 20 dòng chảy</h1>
+  <div class="flex-1 grid-4">
+    <div class="flex-col gap-16">
+      <div style="font-size:23px;letter-spacing:.16em;text-transform:uppercase;color:var(--text);font-weight:600">Đĩa 1 · CH sẵn sàng (10)</div>
+      <div class="flex-col" style="gap:12px;font-size:21px;color:var(--text2);font-weight:300;line-height:1.35">
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Hàng hóa: TO/PO – giao kho – NCC giao</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Hàng hóa: điều chuyển nội bộ giữa các CH</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Hàng hóa: điều phối tổng thể — <b class="accent">chưa có</b></div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Hàng hóa: hàng date – đổi code</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Nhân sự: định biên → tuyển dụng</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Nhân sự: onboarding người mới</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Nhân sự: phân ca hàng tuần</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Nhân sự: xử lý thiếu người đột xuất</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Thiết bị: báo lỗi – sửa chữa</div>
+        <div style="padding-bottom:12px">Quy trình: SOP vận hành CH</div>
+      </div>
+    </div>
+    <div class="flex-col gap-16">
+      <div style="font-size:23px;letter-spacing:.16em;text-transform:uppercase;color:var(--text);font-weight:600">Đĩa 2 · Trải nghiệm (5)</div>
+      <div class="flex-col" style="gap:12px;font-size:21px;color:var(--text2);font-weight:300;line-height:1.35">
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Chấm điểm dịch vụ tận tâm</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Xử lý khiếu nại khách hàng</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Chốt – push – up – cross sale</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Thanh toán — xin TT / mời app</div>
+        <div style="padding-bottom:12px">CSKH VIP / thân thiết</div>
+      </div>
+    </div>
+    <div class="flex-col gap-16">
+      <div style="font-size:23px;letter-spacing:.16em;text-transform:uppercase;color:var(--text);font-weight:600">Đĩa 3 · Hiệu quả (4)</div>
+      <div class="flex-col" style="gap:12px;font-size:21px;color:var(--text2);font-weight:300;line-height:1.35">
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Doanh thu — theo dõi ngày/tuần</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Năng suất — DT/đầu người, CPNS/DT</div>
+        <div style="border-bottom:1px solid var(--border-xlight);padding-bottom:12px">Chi phí — định mức & khung chuẩn</div>
+        <div style="padding-bottom:12px">Hao hụt — ngưỡng & xử lý vượt ngưỡng</div>
+      </div>
+    </div>
+    <div class="flex-col gap-16">
+      <div style="font-size:23px;letter-spacing:.16em;text-transform:uppercase;color:var(--text);font-weight:600">Đĩa 4 · BGĐ nhìn đúng (1)</div>
+      <div class="flex-col" style="gap:12px;font-size:21px;color:var(--text2);font-weight:300;line-height:1.35">
+        <div style="padding-bottom:12px">Vận hành xử lý P&L: nhận → đọc → họp ASM → họp QLST → checkin tuần</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 06 — Hàng hóa 3 luồng ========== -->
+<div class="slide" data-slide="6">
+<div class="s s-std">
+  <div class="topbar">
+    <div class="kicker">Slide 06 · Đĩa 1 — mảng Hàng hóa</div>
+    <div class="slide-num">06</div>
+  </div>
+  <h1 class="title" style="font-size:52px">Hàng hóa — 3 luồng đang chạy</h1>
+  <div class="flex-1" style="display:flex;gap:34px">
+    <div class="card flex-1"><div class="card-title">TO/PO — đơn hàng</div><div class="card-body">Đơn TO/PO → giao kho → NCC giao hàng. Đang chạy bình thường.</div></div>
+    <div class="card flex-1"><div class="card-title">Điều chuyển nội bộ</div><div class="card-body">Điều chuyển hàng giữa các CH — QLST tự xin nhau khi thừa/thiếu.</div></div>
+    <div class="card card-alert flex-1"><div class="card-title-accent">Điều phối tổng thể</div><div class="card-body">Admin <b class="accent-b">chưa có bước điều phối hàng thừa/thiếu toàn hệ thống</b>. 90% QLST tự xin nhau qua luồng điều chuyển nội bộ.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 07 — Hàng date timeline ========== -->
+<div class="slide" data-slide="7">
+<div class="s s-std" style="gap:26px">
+  <div class="topbar">
+    <div class="kicker">Slide 07 · Đĩa 1 · Hàng hóa — dòng chảy sâu</div>
+    <div class="slide-num">07</div>
+  </div>
+  <h1 class="title" style="font-size:52px">Hàng date – đổi code</h1>
+  <div class="flex-1 flex-col border-top">
+    <div style="display:grid;grid-template-columns:60px 1fr 340px 160px;gap:30px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:22px;color:var(--muted3);font-weight:600">1</span><span style="font-size:24px;color:var(--text)">Siêu thị kiểm date, nêu hàng cần xử lý</span><span style="font-size:22px;color:var(--text2);font-weight:300">Ngày 1 → 3</span><span style="font-size:24px;color:var(--text);font-weight:500;text-align:right">~3 ngày</span>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr 340px 160px;gap:30px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:22px;color:var(--muted3);font-weight:600">2</span><span style="font-size:24px;color:var(--text)">KSCL kiểm kê random tại điểm bán, update base</span><span style="font-size:22px;color:var(--text2);font-weight:300">Ngày 4 → 5</span><span style="font-size:24px;color:var(--text);font-weight:500;text-align:right">~2 ngày</span>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr 340px 160px;gap:30px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:22px;color:var(--muted3);font-weight:600">3</span><span style="font-size:24px;color:var(--text)">Ngành hàng kiểm tra giá, KSCL xác nhận, hệ thống điều chỉnh</span><span style="font-size:22px;color:var(--text2);font-weight:300">Ngày 6 → 7</span><span style="font-size:24px;color:var(--text);font-weight:500;text-align:right">~2 ngày</span>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr 340px 160px;gap:30px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:22px;color:var(--muted3);font-weight:600">4</span><span style="font-size:24px;color:var(--text)">KSCL cấp phát mã đồng giá (đổi code)</span><span style="font-size:22px;color:var(--text2);font-weight:300">Ngày 8</span><span style="font-size:24px;color:var(--text);font-weight:500;text-align:right">1 ngày</span>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr 340px 160px;gap:30px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:22px;color:var(--muted3);font-weight:600">5</span><span style="font-size:24px;color:var(--text)">Siêu thị dán tem đè mã vạch cũ, trưng bày lại</span><span style="font-size:22px;color:var(--text2);font-weight:300">Ngay sau bước 4</span><span style="font-size:24px;color:var(--text);font-weight:500;text-align:right">—</span>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr 340px 160px;gap:30px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:22px;color:var(--muted3);font-weight:600">6</span><span style="font-size:24px;color:var(--text)">Bán theo mã DG ở giá gốc — chưa giảm</span><span style="font-size:22px;color:var(--text2);font-weight:300">Ngày 9 → 24</span><span style="font-size:24px;color:var(--text);font-weight:500;text-align:right">~16 ngày</span>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr 340px 160px;gap:30px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:22px;color:var(--muted3);font-weight:600">7</span><span style="font-size:24px;color:var(--text)">Nếu bán chậm → CTKM giảm 25%</span><span style="font-size:22px;color:var(--text2);font-weight:300">Ngày 25(n) → 10(n+1)</span><span style="font-size:24px;color:var(--text);font-weight:500;text-align:right">~16 ngày</span>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr 340px 160px;gap:30px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:22px;color:var(--muted3);font-weight:600">8</span><span style="font-size:24px;color:var(--text)">Nếu vẫn chậm → CTKM giảm 50% (70% không khuyến khích)</span><span style="font-size:22px;color:var(--text2);font-weight:300">Ngày 11(n+1) → 10(n+2)</span><span style="font-size:24px;color:var(--text);font-weight:500;text-align:right">~30 ngày</span>
+    </div>
+  </div>
+  <div style="border-top:1px solid var(--border-light);padding-top:20px;display:flex;justify-content:space-between;align-items:baseline">
+    <div style="font-size:26px;color:var(--text2);font-weight:300">Tổng chu kỳ nếu đi hết cả 3 mức giá</div>
+    <div style="font-size:44px;font-weight:600;color:var(--accent)">~70 ngày</div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 08 — KHUNG 5L: ĐỊNH NGHĨA ĐÚNG (MỚI) ========== -->
+<div class="slide" data-slide="8">
+<div class="s s-std" style="gap:26px">
+  <div class="topbar">
+    <div class="kicker">Slide 08 · Khung 5L — Cách áp đúng</div>
+    <div class="slide-num">08</div>
+  </div>
+  <h1 class="title-sm">Khung 5L — Định nghĩa và quy tắc</h1>
+  <div class="flex-1 flex-col border-top" style="gap:0">
+    <div style="display:grid;grid-template-columns:160px 1fr 1fr;gap:40px;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:26px;color:var(--accent);font-weight:600;letter-spacing:.1em">LÂU</span>
+      <span style="font-size:24px;color:var(--text);font-weight:400">Ở đây mất bao lâu?</span>
+      <span style="font-size:24px;color:var(--accent);font-weight:600">Phải tách rõ thời gian LÀM và thời gian CHỜ</span>
+    </div>
+    <div style="display:grid;grid-template-columns:160px 1fr 1fr;gap:40px;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:26px;color:var(--accent);font-weight:600;letter-spacing:.1em">LƯỢNG</span>
+      <span style="font-size:24px;color:var(--text);font-weight:400">Bao nhiêu việc vào, bao nhiêu ra?</span>
+      <span style="font-size:24px;color:var(--accent);font-weight:600">Con số cụ thể, không cảm tính</span>
+    </div>
+    <div style="display:grid;grid-template-columns:160px 1fr 1fr;gap:40px;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:26px;color:var(--accent);font-weight:600;letter-spacing:.1em">LỰC</span>
+      <span style="font-size:24px;color:var(--text);font-weight:400">Xử lý được bao nhiêu mỗi kỳ?</span>
+      <span style="font-size:24px;color:var(--accent);font-weight:600">Năng lực xử lý của chính bước đó — không phải "nguồn lực" chung chung</span>
+    </div>
+    <div style="display:grid;grid-template-columns:160px 1fr 1fr;gap:40px;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:26px;color:var(--accent);font-weight:600;letter-spacing:.1em">LỆ THUỘC</span>
+      <span style="font-size:24px;color:var(--text);font-weight:400">Phụ thuộc ai / cái gì?</span>
+      <span style="font-size:24px;color:var(--accent);font-weight:600">Tìm điểm phụ thuộc DUY NHẤT mà cả luồng phải chờ — không liệt kê hết</span>
+    </div>
+    <div style="display:grid;grid-template-columns:160px 1fr 1fr;gap:40px;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:26px;color:var(--accent);font-weight:600;letter-spacing:.1em">LỖI</span>
+      <span style="font-size:24px;color:var(--text);font-weight:400">Bao nhiêu phải làm lại / rơi mất?</span>
+      <span style="font-size:24px;color:var(--accent);font-weight:600">= làm lại + từ chối + rớt giữa chừng + thất bại</span>
+    </div>
+  </div>
+  <div class="footer-note" style="background:var(--bg-alt);padding:22px 28px;border-radius:4px;border-top:3px solid var(--accent)">
+    <span style="font-size:28px;font-weight:600;color:var(--accent)">Câu hỏi cốt lõi:</span>
+    <span style="font-size:28px;font-weight:600;color:var(--text)">&nbsp;&nbsp;"LƯỢNG có vượt LỰC không?"</span>
+    <span style="font-size:24px;color:var(--text2);font-weight:300">&nbsp;&nbsp;→&nbsp;&nbsp;Sau khi soi hết 5L: "Nếu tháo điểm này, đầu ra có tăng không?"</span>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 09 — TEM 5L HÀNG DATE (SỬA LẠI) ========== -->
+<div class="slide" data-slide="9">
+<div class="s s-std" style="gap:22px;padding-bottom:50px">
+  <div class="topbar">
+    <div class="kicker">Slide 09 · Tem 5L — Hàng date đổi code (đã sửa)</div>
+    <div class="slide-num">09</div>
+  </div>
+  <h1 class="title-sm" style="font-size:44px">Tem 5L — Hàng date đổi code</h1>
+  <table class="tbl" style="font-size:20px">
+    <thead><tr>
+      <th style="width:130px">Chữ L</th>
+      <th>Kiểm date → cấp mã DG (8 ngày)</th>
+      <th>Bán giá gốc DG (16 ngày)</th>
+      <th>Giảm 25% → 50% (~46 ngày)</th>
+      <th>Điều phối liên nhà A→B</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td class="cell-accent">LÂU</td>
+        <td>LÀM: ~2 ngày (kiểm date + cấp mã)<br><span class="cell-accent">CHỜ: ~6 ngày (chờ KSCL kiểm kê + Ngành hàng duyệt giá)</span></td>
+        <td>16 ngày bán — thời gian LÀM hợp lý</td>
+        <td>~46 ngày — phần lớn là thời gian CHỜ khách mua</td>
+        <td class="cell-accent">Chưa đo — cần tách: bao lâu phân tích + bao lâu chờ xe/kho</td>
+      </tr>
+      <tr>
+        <td class="cell-accent">LƯỢNG</td>
+        <td class="cell-accent">Chưa đo: 23 CH × ? SKU date/tháng = ? mã DG cần cấp</td>
+        <td class="cell-accent">Chưa đo: bao nhiêu mã DG bán hết ở giá gốc vs phải giảm tiếp</td>
+        <td class="cell-accent">Chưa tách tỷ lệ bán hết theo mức 25% vs 50% vs hủy</td>
+        <td class="cell-accent">Chưa đo: bao nhiêu lượt điều phối/tháng</td>
+      </tr>
+      <tr>
+        <td class="cell-accent">LỰC</td>
+        <td class="cell-accent">1 Trưởng KSCL xử lý bao nhiêu mã/ngày cho 23 CH? → Chưa đo</td>
+        <td>Không giới hạn — bán tại quầy</td>
+        <td>Không giới hạn — bán tại quầy</td>
+        <td class="cell-accent">Giới hạn bởi thời gian GĐVH phân tích tồn kho 2 nhà</td>
+      </tr>
+      <tr>
+        <td style="color:var(--text);font-weight:600">LỆ THUỘC</td>
+        <td><span class="cell-accent">Trưởng KSCL</span> — người DUY NHẤT cấp mã DG; phải chờ Ngành hàng duyệt giá trước mới cấp được</td>
+        <td>Không phụ thuộc ai</td>
+        <td>Ngành hàng quyết định mức giảm — nhưng có policy chuẩn, không chặn</td>
+        <td>GĐVH — người duy nhất quyết định chuyển hàng giữa các nhà</td>
+      </tr>
+      <tr>
+        <td class="cell-accent">LỖI</td>
+        <td>Chưa đo: bao nhiêu lần cấp sai mã / cấp trễ → siêu thị phải chờ</td>
+        <td>Không rõ — chưa tách "không bán được" vs "bán chậm"</td>
+        <td class="cell-accent">Cuối cùng không bán hết → xuất hủy. Ngưỡng ≤ 0,21% DT/năm</td>
+        <td>Chưa đo: hàng chuyển sai / chuyển trễ</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="footer-note" style="display:flex;gap:40px;align-items:baseline">
+    <div>
+      <span class="footer-label">Câu hỏi chưa trả lời được:&nbsp;&nbsp;</span>
+      <span style="font-size:26px;color:var(--accent);font-weight:600">LƯỢNG mã DG cần cấp mỗi tháng có vượt LỰC xử lý của 1 Trưởng KSCL không?</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 10 — Nhân sự ========== -->
+<div class="slide" data-slide="10">
+<div class="s s-std">
+  <div class="topbar">
+    <div class="kicker">Slide 10 · Đĩa 1 — mảng Nhân sự</div>
+    <div class="slide-num">10</div>
+  </div>
+  <h1 class="title" style="font-size:52px">Nhân sự — 4 luồng đang chạy</h1>
+  <div class="flex-1 grid-2">
+    <div class="card card-alert"><div class="card-title-accent">Định biên → tuyển dụng</div><div class="card-body">Có định biên điểm bán, order sang tuyển dụng. Đáp ứng hay <b class="accent-b">trễ deadline 7 ngày</b>, phải push thường xuyên.</div></div>
+    <div class="card card-alert"><div class="card-title-accent">Onboarding người mới</div><div class="card-body">Tỷ lệ out trong <b class="accent-b">3 ngày đầu</b> đi làm cao — chủ yếu không phù hợp công việc/giờ giấc, đa số là sinh viên làm thêm.</div></div>
+    <div class="card"><div class="card-title">Phân ca hàng tuần</div><div class="card-body">Gửi lịch 1 tuần/lần, nguyên tắc off đầu tuần – bán cuối tuần, sáng ít hơn chiều 1 người. Chấm công linh hoạt — không ùn tắc.</div></div>
+    <div class="card"><div class="card-title">Thiếu người đột xuất</div><div class="card-body">Tăng ca sáng / xin hỗ trợ CH khác / ASM điều phối từ điểm đủ sang. Không ùn tắc.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 11 — Thiết bị & Quy trình ========== -->
+<div class="slide" data-slide="11">
+<div class="s s-std">
+  <div class="topbar">
+    <div class="kicker">Slide 11 · Đĩa 1 — Thiết bị & Quy trình</div>
+    <div class="slide-num">11</div>
+  </div>
+  <h1 class="title">Thiết bị & Quy trình</h1>
+  <div class="flex-1" style="display:flex;gap:40px">
+    <div class="card flex-1"><div class="card-title">Thiết bị</div><div class="card-body">POS, mạng, điện — có hệ thống approval báo lỗi gửi IT/hành chính, xử lý trong vài phút, ASM push cùng. Không ùn tắc.</div></div>
+    <div class="card flex-1"><div class="card-title">Quy trình (SOP)</div><div class="card-body">Đóng/mở ca, kết ca, kiểm kê hàng hóa – tài sản, trưng bày tiêu chuẩn dịch vụ, khiếu nại — đã ban hành đầy đủ, kaizen liên tục. Hiện không có vấn đề.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 12 — Đĩa 2 ========== -->
+<div class="slide" data-slide="12">
+<div class="s s-std">
+  <div class="topbar">
+    <div class="kicker">Slide 12 · Đĩa 2 — Toàn cảnh</div>
+    <div class="slide-num">12</div>
+  </div>
+  <h1 class="title" style="font-size:52px">5 quy trình phục vụ khách</h1>
+  <div class="flex-1 flex-col justify-center border-top">
+    <div class="row-item"><div class="row-num">A</div><div class="row-label">Chấm điểm dịch vụ tận tâm</div><div class="row-desc">QC ngày · kiểm kê 1-2 lần/tháng · ASM & GĐVH 1 lần/tháng — có vòng phản hồi qua Lark</div></div>
+    <div class="row-item"><div class="row-num">B</div><div class="row-label">Xử lý khiếu nại khách hàng</div><div class="row-desc">2 luồng rõ ràng, bot báo cáo tuần cho ASM–GĐVH–BGĐ</div></div>
+    <div class="row-item"><div class="row-num">C</div><div class="row-label">Chốt – push – up – cross sale</div><div class="row-desc">QLST tự chọn SP & kịch bản theo CTKM Ngành hàng — <span class="accent-b">không đồng nhất giữa các CH</span></div></div>
+    <div class="row-item"><div class="row-num">D</div><div class="row-label">Thanh toán — xin TT / mời app</div><div class="row-desc">Có target khách mới/vãng lai hàng tháng, có thưởng top</div></div>
+    <div class="row-item"><div class="row-num">E</div><div class="row-label">CSKH VIP / thân thiết</div><div class="row-desc">Base chung, chiến dịch tự động — nhưng nội dung liên hệ mỗi CH <span class="accent-b">tự soạn khác nhau</span></div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 13 — Khiếu nại / Push sale / CSKH ========== -->
+<div class="slide" data-slide="13">
+<div class="s s-std">
+  <div class="topbar">
+    <div class="kicker">Slide 13 · Đĩa 2 · Ba dòng chảy còn lại</div>
+    <div class="slide-num">13</div>
+  </div>
+  <h1 class="title-sm" style="font-size:44px">Khiếu nại · Push sale · CSKH</h1>
+  <div class="flex-1 grid-3">
+    <div class="card"><div class="card-title">Khiếu nại khách hàng</div><div class="card-body">L1: CH tự xử lý, khách đồng ý → đóng ca, cập nhật form CSKH. L2: khách không đồng ý/cần cấp cao → CSKH xử lý. Bot báo cáo tuần. Không vướng.</div></div>
+    <div class="card card-alert"><div class="card-title-accent">Push – up – cross sale</div><div class="card-body">CTKM từ Ngành hàng → QLST <b class="accent-b">tự chọn</b> SP và kịch bản → khó đồng nhất. Đo qua TBB, SP/bill.</div></div>
+    <div class="card card-alert"><div class="card-title-accent">CSKH VIP/thân thiết</div><div class="card-body">Base khách hàng chung, chiến dịch tự động — nhưng nội dung SMS/Zalo mỗi CH tự soạn, <b class="accent-b">chưa có công cụ đo hiệu quả kịch bản</b>.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 14 — Đĩa 3 ========== -->
+<div class="slide" data-slide="14">
+<div class="s s-std" style="gap:26px">
+  <div class="topbar">
+    <div class="kicker">Slide 14 · Đĩa 3 — Toàn cảnh</div>
+    <div class="slide-num">14</div>
+  </div>
+  <h1 class="title-sm" style="font-size:44px">Doanh thu · Năng suất · Chi phí · Hao hụt</h1>
+  <div class="flex-1 grid-2" style="gap:0 70px">
+    <div class="flex-col border-top">
+      <div style="padding:20px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:30px"><span style="font-size:24px;color:var(--text2);font-weight:300">Doanh thu — tần suất</span><span style="font-size:32px;font-weight:600;color:var(--text)">Ngày + tuần</span></div><div style="font-size:19px;color:var(--text2);font-weight:300;margin-top:4px">Target tháng/ngày, cảnh báo CH dưới 90% → ASM làm việc 1:1 với QLST hàng tuần</div></div>
+      <div style="padding:20px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:30px"><span style="font-size:24px;color:var(--text2);font-weight:300">Năng suất — chỉ số</span><span style="font-size:32px;font-weight:600;color:var(--text)">DT/đầu người</span></div><div style="font-size:19px;color:var(--text2);font-weight:300;margin-top:4px">+ tỷ lệ chi phí nhân sự / doanh thu ≤ 10%</div></div>
+    </div>
+    <div class="flex-col border-top">
+      <div style="padding:20px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:30px"><span style="font-size:24px;color:var(--text2);font-weight:300">Chi phí — tần suất</span><span style="font-size:32px;font-weight:600;color:var(--accent)">1 lần / tháng</span></div><div style="font-size:19px;color:var(--text2);font-weight:300;margin-top:4px">Định mức VPP-CCDC-ship-hủy hàng; điện nước theo khung chuẩn cùng size CH</div></div>
+      <div style="padding:20px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:30px"><span style="font-size:24px;color:var(--text2);font-weight:300">Hao hụt — tần suất</span><span style="font-size:32px;font-weight:600;color:var(--accent)">1 lần / tháng</span></div><div style="font-size:19px;color:var(--text2);font-weight:300;margin-top:4px">Có ngưỡng cho phép; vượt → nhắc nhở, cảnh báo, yêu cầu giải trình, đền bù nếu có</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 15 — Dòng chảy P&L ========== -->
+<div class="slide" data-slide="15">
+<div class="s s-std">
+  <div class="topbar">
+    <div class="kicker">Slide 15 · Đĩa 4 — dòng chảy chính</div>
+    <div class="slide-num">15</div>
+  </div>
+  <h1 class="title" style="font-size:52px">Vận hành xử lý P&L</h1>
+  <div class="flex-1" style="display:flex;align-items:flex-start;justify-content:center;padding-top:20px">
+    <div class="flex-col" style="align-items:center;gap:14px;flex:1"><div style="width:64px;height:64px;border-radius:50%;border:2px solid var(--text);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:600">1</div><div style="font-size:22px;font-weight:600;text-align:center;line-height:1.3">Nhận P&L 23 CH</div><div style="font-size:18px;color:var(--text2);font-weight:300;text-align:center;line-height:1.3">Từ Kế toán qua Lark<br>ngày 10 tháng N+1</div></div>
+    <div style="display:flex;align-items:center;padding-bottom:60px"><div style="width:36px;height:1px;background:var(--border)"></div></div>
+    <div class="flex-col" style="align-items:center;gap:14px;flex:1"><div style="width:64px;height:64px;border-radius:50%;border:2px solid var(--text);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:600">2</div><div style="font-size:22px;font-weight:600;text-align:center;line-height:1.3">GĐVH họp ASM</div><div style="font-size:18px;color:var(--text2);font-weight:300;text-align:center;line-height:1.3">1 lần/tháng — giải trình<br>CH yếu + nhân bản CH tốt</div></div>
+    <div style="display:flex;align-items:center;padding-bottom:60px"><div style="width:36px;height:1px;background:var(--border)"></div></div>
+    <div class="flex-col" style="align-items:center;gap:14px;flex:1"><div style="width:64px;height:64px;border-radius:50%;border:2px solid var(--text);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:600">3</div><div style="font-size:22px;font-weight:600;text-align:center;line-height:1.3">Đồng bộ nhiều ASM</div><div style="font-size:18px;color:var(--text2);font-weight:300;text-align:center;line-height:1.3">GĐVH họp chung, thống nhất<br>trước khi mỗi ASM làm riêng</div></div>
+    <div style="display:flex;align-items:center;padding-bottom:60px"><div style="width:36px;height:1px;background:var(--border)"></div></div>
+    <div class="flex-col" style="align-items:center;gap:14px;flex:1"><div style="width:64px;height:64px;border-radius:50%;border:2px solid var(--text);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:600">4</div><div style="font-size:22px;font-weight:600;text-align:center;line-height:1.3">ASM họp QLST</div><div style="font-size:18px;color:var(--text2);font-weight:300;text-align:center;line-height:1.3">Triển khai hành động —<br>cải thiện hoặc nhân bản</div></div>
+    <div style="display:flex;align-items:center;padding-bottom:60px"><div style="width:36px;height:1px;background:var(--border)"></div></div>
+    <div class="flex-col" style="align-items:center;gap:14px;flex:1"><div style="width:64px;height:64px;border-radius:50%;border:2px solid var(--text);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:600">5</div><div style="font-size:22px;font-weight:600;text-align:center;line-height:1.3">Checkin GĐVH–ASM</div><div style="font-size:18px;color:var(--text2);font-weight:300;text-align:center;line-height:1.3">1 lần/tuần —<br>theo dõi kết quả</div></div>
+  </div>
+  <div class="footer-note">Dòng chảy phục vụ <span class="accent-b">cả hai chiều</span>: cải thiện CH đang yếu, và tìm hiểu để nhân bản CH đang tốt.</div>
+</div>
+</div>
+
+<!-- ========== SLIDE 16 — Ai xem P&L ========== -->
+<div class="slide" data-slide="16">
+<div class="s s-std">
+  <div class="topbar">
+    <div class="kicker">Slide 16 · Đĩa 4 — mức độ tiếp cận</div>
+    <div class="slide-num">16</div>
+  </div>
+  <h1 class="title-sm">Ai xem P&L, xem đến đâu</h1>
+  <div class="flex-1 grid-3">
+    <div class="flex-col gap-16" style="border-top:3px solid var(--text);padding-top:20px"><div style="font-size:26px;font-weight:600">GĐVH</div><div style="font-size:22px;color:var(--text2);font-weight:300;line-height:1.5">Toàn bộ P&L 23 CH: doanh thu, chi phí, lợi nhuận gộp, lỗ lãi — <b>kể cả EBIT</b></div></div>
+    <div class="flex-col gap-16" style="border-top:3px solid var(--border);padding-top:20px"><div style="font-size:26px;font-weight:600">ASM</div><div style="font-size:22px;color:var(--text2);font-weight:300;line-height:1.5">Điểm bán mình phụ trách: doanh thu, tỷ lệ lợi nhuận, chi phí tăng giảm</div></div>
+    <div class="flex-col gap-16" style="border-top:3px solid var(--accent);padding-top:20px"><div style="font-size:26px;font-weight:600">QLST</div><div style="font-size:22px;color:var(--text2);font-weight:300;line-height:1.5">Doanh thu – Lợi nhuận – Chi phí của CH mình. <b class="accent-b">Không xem tầng EBIT</b></div></div>
+  </div>
+  <div class="footer-note"><span class="footer-label">Khoảng hở đã thấy&nbsp;&nbsp;</span>Việc ghi chép hành động sau họp GĐVH–ASM–QLST <b class="accent-b">chưa được chuẩn hóa</b> — lúc có biên bản họp, lúc chỉ qua chat, lúc chỉ nói miệng. Không có nơi lưu tập trung.</div>
+</div>
+</div>
+
+<!-- ========== SLIDE 17 — Ranh giới trách nhiệm ========== -->
+<div class="slide" data-slide="17">
+<div class="s s-std" style="gap:34px">
+  <div class="topbar">
+    <div class="kicker">Slide 17 · Ranh giới trách nhiệm</div>
+    <div class="slide-num">17</div>
+  </div>
+  <h1 class="title-sm">Ai chịu trách nhiệm đoạn nào</h1>
+  <div class="flex-1 grid-3">
+    <div class="flex-col" style="gap:18px;border-top:3px solid var(--text);padding-top:20px"><div style="font-size:23px;letter-spacing:.1em;text-transform:uppercase;font-weight:600">Vận hành chịu trách nhiệm trực tiếp</div><div style="font-size:22px;color:var(--text2);font-weight:300;line-height:1.6">Đọc P&L, so sánh hiệu quả giữa các CH qua 4 khía cạnh<br>Phát hiện chênh lệch, đề xuất CH cần nhân bản hoặc cần cải thiện</div></div>
+    <div class="flex-col" style="gap:18px;border-top:3px solid var(--border);padding-top:20px"><div style="font-size:23px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--text2)">Vận hành có ảnh hưởng</div><div style="font-size:22px;color:var(--text2);font-weight:300;line-height:1.6">Chất lượng đề xuất nhân bản / cải thiện đưa xuống ASM<br>Mức độ ASM và QLST thực thi đúng cam kết sau họp</div></div>
+    <div class="flex-col" style="gap:18px;border-top:3px solid var(--accent);padding-top:20px"><div style="font-size:23px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--accent)">Phòng khác / BGĐ chịu trách nhiệm</div><div style="font-size:22px;color:var(--text2);font-weight:300;line-height:1.6">Kế toán tạo số liệu P&L đúng, đủ, đúng hạn<br>ASM giải trình và triển khai với QLST<br>BGĐ quyết định đầu tư nguồn lực khi cần</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 18 — ĐIỂM NGHẼN CẮT NGANG PHÒNG BAN (MỚI) ========== -->
+<div class="slide" data-slide="18">
+<div class="s s-std" style="gap:22px;padding-bottom:50px">
+  <div class="topbar">
+    <div class="kicker">Slide 18 · Điểm nghẽn phòng ban — nhìn cắt ngang</div>
+    <div class="slide-num">18</div>
+  </div>
+  <h1 class="title-sm" style="font-size:44px">Phòng ban nào đang chặn nhiều dòng chảy?</h1>
+  <div style="font-size:22px;color:var(--text2);font-weight:300;line-height:1.4;border-left:3px solid var(--accent);padding-left:20px">Thay vì nhìn từng dòng chảy riêng lẻ, soi <span class="accent-b">cùng một phòng ban xuất hiện ở bao nhiêu dòng chảy</span> — nếu 1 phòng ban là LỆ THUỘC của nhiều flow, đó có thể là điểm nghẽn hệ thống.</div>
+  <table class="tbl" style="font-size:19px">
+    <thead><tr>
+      <th style="width:180px">Phòng ban</th>
+      <th style="width:100px">Số flow phụ thuộc</th>
+      <th>Vai trò trong từng flow</th>
+      <th style="width:200px">Dấu hiệu nghẽn</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td class="cell-accent" style="font-size:24px">KSCL</td>
+        <td class="cell-accent" style="font-size:28px;text-align:center">4</td>
+        <td>Hàng date: kiểm kê + cấp mã DG (bước 2-4) · Chấm điểm dịch vụ: kiểm kê 1-2 lần/tháng · Hao hụt: xác nhận xuất hủy · Điều phối liên nhà: xác nhận tồn kho</td>
+        <td class="cell-accent">1 Trưởng KSCL xử lý cho 23 CH — LỰC chưa đo, có thể là nút thắt</td>
+      </tr>
+      <tr>
+        <td class="cell-accent" style="font-size:24px">Phòng Nhân sự</td>
+        <td class="cell-accent" style="font-size:28px;text-align:center">2</td>
+        <td>Tuyển dụng: nhận order → tuyển (trễ 7 ngày) · Onboarding: quy trình đào tạo ban đầu (out 3 ngày đầu cao)</td>
+        <td class="cell-accent">Trễ 7 ngày liên tục = LỰC tuyển < LƯỢNG cần tuyển (đã chứng minh)</td>
+      </tr>
+      <tr>
+        <td style="font-size:24px;color:var(--text);font-weight:600">Ngành hàng</td>
+        <td style="font-size:28px;text-align:center;font-weight:600">3</td>
+        <td>Hàng date: duyệt giá (bước 3) · CTKM cho push sale: cung cấp chương trình nhưng không chuẩn hóa kịch bản · Định giá hàng đồng giá</td>
+        <td>Cung cấp input nhưng không chuẩn hóa output → mỗi CH tự làm khác nhau</td>
+      </tr>
+      <tr>
+        <td style="font-size:24px;color:var(--text);font-weight:600">Kế toán</td>
+        <td style="font-size:28px;text-align:center;font-weight:600">1</td>
+        <td>P&L: tạo số liệu, gửi ngày 10 tháng N+1</td>
+        <td>Chưa thấy trễ — nhưng nếu trễ thì cả Đĩa 4 dừng</td>
+      </tr>
+      <tr>
+        <td style="font-size:24px;color:var(--text2);font-weight:300">IT / Hành chính</td>
+        <td style="font-size:28px;text-align:center;font-weight:300;color:var(--muted3)">1</td>
+        <td>Thiết bị: sửa chữa POS/mạng/điện</td>
+        <td style="color:var(--muted3)">Không vướng — xử lý vài phút</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="footer-note" style="background:var(--bg-alt);padding:20px 28px;border-radius:4px;border-top:3px solid var(--accent)">
+    <span style="font-size:24px;font-weight:600;color:var(--accent)">Hai ứng viên điểm nghẽn phòng ban:</span>
+    <span style="font-size:22px;color:var(--text)"> &nbsp;(1) <b>KSCL</b> — 1 người chặn 4 flow, LỰC chưa đo &nbsp;|&nbsp; (2) <b>Phòng Nhân sự</b> — trễ 7 ngày đã chứng minh LƯỢNG > LỰC</span>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 19 — KHUNG 2N — 8 ĐIỂM BẤT THƯỜNG (MỚI) ========== -->
+<div class="slide" data-slide="19">
+<div class="s s-std" style="gap:20px;padding-bottom:50px">
+  <div class="topbar">
+    <div class="kicker">Slide 19 · Khung 2N — Chọn ưu tiên</div>
+    <div class="slide-num">19</div>
+  </div>
+  <h1 class="title-sm" style="font-size:44px">8 điểm bất thường — Chấm NHIỀU × NẶNG</h1>
+  <div style="font-size:21px;color:var(--text2);font-weight:300;line-height:1.4;border-left:3px solid var(--accent);padding-left:20px"><b class="accent">NHIỀU</b> = xảy ra thường xuyên / ảnh hưởng nhiều CH / nhiều flow &nbsp;&nbsp;|&nbsp;&nbsp; <b class="accent">NẶNG</b> = hậu quả lớn khi xảy ra (mất tiền, mất khách, mất người, mất kiểm soát). &nbsp;&nbsp;Thang 1–5.</div>
+  <table class="tbl" style="font-size:19px">
+    <thead><tr>
+      <th style="width:40px">#</th>
+      <th>Điểm bất thường</th>
+      <th style="width:100px;text-align:center">NHIỀU</th>
+      <th style="width:100px;text-align:center">NẶNG</th>
+      <th style="width:100px;text-align:center">N×N</th>
+      <th style="width:280px">Căn cứ chấm</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td class="cell-dark">1</td>
+        <td>Admin chưa điều phối hàng tổng thể — 90% QL tự xin nhau</td>
+        <td class="matrix-cell score-high">4</td>
+        <td class="matrix-cell score-high">4</td>
+        <td class="matrix-cell score-high" style="font-size:32px">16</td>
+        <td style="font-size:17px">Xảy ra ở 23 CH hàng ngày; hàng thừa/thiếu ảnh hưởng trực tiếp DT + hao hụt</td>
+      </tr>
+      <tr>
+        <td class="cell-dark">2</td>
+        <td>Ghi chép hành động sau họp P&L chưa chuẩn hóa</td>
+        <td class="matrix-cell score-high">4</td>
+        <td class="matrix-cell score-high">4</td>
+        <td class="matrix-cell score-high" style="font-size:32px">16</td>
+        <td style="font-size:17px">Mỗi tháng 1 lần × 23 CH; mất kiểm soát cam kết = BGĐ không nhìn đúng (Đĩa 4)</td>
+      </tr>
+      <tr>
+        <td class="cell-dark">3</td>
+        <td>Push/up/cross sale — QLST tự chọn, không đồng nhất</td>
+        <td class="matrix-cell score-high">5</td>
+        <td class="matrix-cell score-mid">3</td>
+        <td class="matrix-cell score-high" style="font-size:32px">15</td>
+        <td style="font-size:17px">Mỗi ngày × 23 CH; ảnh hưởng TBB + SP/bill nhưng có CTKM bù đắp phần nào</td>
+      </tr>
+      <tr>
+        <td class="cell-dark">4</td>
+        <td>Hàng date-đổi code — LƯỢNG/LỰC chưa đo, chu kỳ ~70 ngày</td>
+        <td class="matrix-cell score-mid">3</td>
+        <td class="matrix-cell score-high">4</td>
+        <td class="matrix-cell score-mid" style="font-size:32px">12</td>
+        <td style="font-size:17px">Không xảy ra mọi lúc nhưng hậu quả rõ: hao hụt, mất margin khi giảm giá</td>
+      </tr>
+      <tr>
+        <td class="cell-dark">5</td>
+        <td>Tuyển dụng trễ 7 ngày so với deadline định biên</td>
+        <td class="matrix-cell score-high">4</td>
+        <td class="matrix-cell score-mid">3</td>
+        <td class="matrix-cell score-mid" style="font-size:32px">12</td>
+        <td style="font-size:17px">Xảy ra liên tục; thiếu người = tăng ca + giảm dịch vụ, nhưng có cơ chế bù (xin CH khác)</td>
+      </tr>
+      <tr>
+        <td class="cell-dark">6</td>
+        <td>Onboarding — tỷ lệ out sớm 3 ngày đầu cao</td>
+        <td class="matrix-cell score-high">4</td>
+        <td class="matrix-cell score-mid">3</td>
+        <td class="matrix-cell score-mid" style="font-size:32px">12</td>
+        <td style="font-size:17px">Tuyển xong lại mất → vòng lặp với #5; chi phí tuyển + đào tạo mất trắng</td>
+      </tr>
+      <tr>
+        <td class="cell-dark">7</td>
+        <td>Vai trò ASM chưa rõ khi P&L có chênh lệch</td>
+        <td class="matrix-cell score-mid">3</td>
+        <td class="matrix-cell score-high">4</td>
+        <td class="matrix-cell score-mid" style="font-size:32px">12</td>
+        <td style="font-size:17px">Không xảy ra mỗi ngày nhưng ASM là bản lề giữa GĐVH và QLST</td>
+      </tr>
+      <tr>
+        <td class="cell-dark">8</td>
+        <td>CSKH — chưa có công cụ đo hiệu quả kịch bản</td>
+        <td class="matrix-cell score-mid">3</td>
+        <td class="matrix-cell score-low">2</td>
+        <td class="matrix-cell score-low" style="font-size:32px">6</td>
+        <td style="font-size:17px">Ảnh hưởng retention nhưng chưa thấy thiệt hại trực tiếp, có campaign tự động bù</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="footer-note">
+    <span class="footer-label">Lưu ý&nbsp;&nbsp;</span>Điểm trên là <span class="accent-b">ước tính sơ bộ từ dữ liệu phỏng vấn</span> — cần kiểm chứng bằng ít nhất 2 nguồn dữ liệu độc lập trước khi kết luận.
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 20 — VẤN ĐỀ ỒN ÀO vs ĐIỂM NGHẼN THẬT (MỚI) ========== -->
+<div class="slide" data-slide="20">
+<div class="s s-std" style="gap:28px">
+  <div class="topbar">
+    <div class="kicker">Slide 20 · Phân biệt — ồn ào vs nghẽn thật</div>
+    <div class="slide-num">20</div>
+  </div>
+  <h1 class="title-sm" style="font-size:44px">"Vấn đề lớn nhất" ≠ "Điểm nghẽn thật"</h1>
+  <div class="flex-1" style="display:grid;grid-template-columns:1fr 40px 1fr;gap:30px;align-items:start;padding-top:10px">
+    <div class="flex-col" style="gap:24px">
+      <div style="font-size:24px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--muted);border-bottom:3px solid var(--muted);padding-bottom:14px">Vấn đề ồn ào nhất (nói tới nhiều)</div>
+      <div class="flex-col" style="gap:16px">
+        <div style="display:flex;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--border-xlight)"><span style="font-size:28px;font-weight:600;color:var(--muted)">16</span><span style="font-size:23px;color:var(--text);font-weight:300">#1 Admin chưa điều phối hàng tổng thể</span></div>
+        <div style="display:flex;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--border-xlight)"><span style="font-size:28px;font-weight:600;color:var(--muted)">16</span><span style="font-size:23px;color:var(--text);font-weight:300">#2 Ghi chép hành động sau P&L chưa chuẩn hóa</span></div>
+        <div style="display:flex;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--border-xlight)"><span style="font-size:28px;font-weight:600;color:var(--muted)">15</span><span style="font-size:23px;color:var(--text);font-weight:300">#3 Push sale không đồng nhất giữa 23 CH</span></div>
+      </div>
+      <div style="font-size:20px;color:var(--muted);font-weight:300;line-height:1.5;font-style:italic">Những điểm này quan trọng — nhưng tháo chúng ra có thể không tăng output hệ thống ngay nếu điểm nghẽn nằm ở chỗ khác.</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:32px;color:var(--border);font-weight:200">≠</div>
+    <div class="flex-col" style="gap:24px">
+      <div style="font-size:24px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--accent);border-bottom:3px solid var(--accent);padding-bottom:14px">Ứng viên điểm nghẽn thật (đang chặn output)</div>
+      <div class="flex-col" style="gap:16px">
+        <div class="card card-alert" style="padding:20px 24px">
+          <div style="font-size:23px;font-weight:600;color:var(--accent)">KSCL — 1 người, 4 flow, LỰC chưa đo</div>
+          <div style="font-size:20px;color:var(--text2);font-weight:300;line-height:1.5">Trưởng KSCL là LỆ THUỘC DUY NHẤT của hàng date (cấp mã DG), chấm điểm dịch vụ, kiểm kê, xác nhận hao hụt. Nếu 1 người này nghẽn → 4 dòng chảy cùng chậm.</div>
+          <div style="font-size:18px;color:var(--accent);font-weight:500">Câu hỏi kiểm chứng: LƯỢNG công việc KSCL/tháng có vượt LỰC xử lý của 1 người không?</div>
+        </div>
+        <div class="card card-alert" style="padding:20px 24px">
+          <div style="font-size:23px;font-weight:600;color:var(--accent)">Phòng Nhân sự — trễ 7 ngày = đã chứng minh LƯỢNG > LỰC</div>
+          <div style="font-size:20px;color:var(--text2);font-weight:300;line-height:1.5">Tuyển trễ → thiếu người → onboarding vội → out sớm → tuyển lại = vòng lặp. Đây là điểm nghẽn đã có bằng chứng (7 ngày trễ liên tục), không cần đo thêm.</div>
+          <div style="font-size:18px;color:var(--accent);font-weight:500">Câu hỏi kiểm chứng: Nếu tuyển đúng hạn, tỷ lệ out 3 ngày đầu có giảm không?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-note"><span class="footer-label">Quy tắc 2N&nbsp;&nbsp;</span>Liệt kê hết → chấm NHIỀU × NẶNG → chọn 2-3 top → kiểm chứng bằng ≥2 nguồn dữ liệu độc lập → mới kết luận đâu là "điểm nghẽn thật".</div>
+</div>
+</div>
+
+<!-- ========== SLIDE 21 — Con số của bản vẽ ========== -->
+<div class="slide" data-slide="21">
+<div class="s s-std" style="padding:74px 110px 58px">
+  <div class="topbar">
+    <div class="kicker">Slide 21 · Con số của bản vẽ</div>
+    <div class="slide-num">21</div>
+  </div>
+  <h1 class="title" style="font-size:52px">Con số của bản vẽ</h1>
+  <div class="flex-1 grid-2" style="gap:90px;align-items:start">
+    <div class="flex-col border-top">
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Số đĩa</span><span style="font-size:24px;font-weight:400">4</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Số dòng chảy</span><span style="font-size:30px;font-weight:600">20</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Chu kỳ hàng date dài nhất</span><span style="font-size:30px;font-weight:600;color:var(--accent)">~70 ngày</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Ngưỡng hao hụt hàng date</span><span style="font-size:24px;font-weight:400">≤ 0,21% DT / năm</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Tuyển dụng — trễ so với order</span><span style="font-size:24px;font-weight:400">7 ngày</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Tỷ lệ CPNS / DT</span><span style="font-size:24px;font-weight:400">≤ 10%</span></div></div>
+    </div>
+    <div class="flex-col border-top">
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Phòng ban chặn nhiều flow nhất</span><span style="font-size:30px;font-weight:600;color:var(--accent)">KSCL (4 flow)</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Phòng ban đã chứng minh LƯỢNG > LỰC</span><span style="font-size:30px;font-weight:600;color:var(--accent)">Nhân sự</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Điểm 2N cao nhất</span><span style="font-size:24px;font-weight:400">#1 + #2 (cùng 16)</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Số mã DG / tháng</span><span style="font-size:30px;font-weight:600;color:var(--accent)">Chưa đo</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Ghi chép hành động sau P&L</span><span style="font-size:30px;font-weight:600;color:var(--accent)">Chưa chuẩn hóa</span></div></div>
+      <div style="padding:18px 0;border-bottom:1px solid var(--border-xlight)"><div style="display:flex;justify-content:space-between"><span style="font-size:23px;color:var(--text2);font-weight:300">Tầng P&L QLST không xem</span><span style="font-size:30px;font-weight:600;color:var(--accent)">EBIT</span></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 22 — Kết ========== -->
+<div class="slide" data-slide="22">
+<div class="s s-end">
+  <div style="display:flex;justify-content:space-between;align-items:baseline">
+    <div class="kicker">Slide 22 · Kết — buổi này dừng ở đây</div>
+    <div class="slide-num">22</div>
+  </div>
+  <div style="max-width:1480px" class="flex-col" style="gap:40px">
+    <div style="font-size:72px;line-height:1.22;font-weight:300;letter-spacing:-.005em">Trước khi cải tiến hệ thống, phải nhìn thấy hệ thống.</div>
+    <div style="width:180px;height:1px;background:var(--accent);margin-top:40px"></div>
+  </div>
+  <div class="grid-2" style="gap:100px;border-top:1px solid var(--border-light);padding-top:30px">
+    <div class="flex-col" style="gap:12px">
+      <div style="font-size:24px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600">Đã làm</div>
+      <div style="font-size:23px;line-height:1.5;color:var(--text2);font-weight:300">Tách khách hàng cuối và người nhận trung gian · Chốt Mâm và 4 đĩa · Liệt kê 20 dòng chảy · Áp khung 5L cho hàng date – đổi code (tách LÀM/CHỜ, xác định LỆ THUỘC duy nhất) · Vẽ dòng chảy P&L · Xác định ranh giới trách nhiệm · <span class="accent-b">Soi điểm nghẽn cắt ngang phòng ban</span> · <span class="accent-b">Chấm sơ bộ 2N cho 8 điểm bất thường</span> · <span class="accent-b">Phân biệt vấn đề ồn ào vs điểm nghẽn thật</span></div>
+    </div>
+    <div class="flex-col" style="gap:12px">
+      <div style="font-size:24px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600">Chưa làm — và có chủ đích</div>
+      <div style="font-size:23px;line-height:1.5;color:var(--text2);font-weight:300">Chưa kiểm chứng 2N bằng ≥2 nguồn dữ liệu độc lập · Chưa đo LƯỢNG thực tế của KSCL · Chưa soi 5L cho Đĩa 2 và Đĩa 3 · Chưa kết luận nguyên nhân gốc · Chưa đề xuất cải tiến</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== SLIDE 23 — Việc buổi sau ========== -->
+<div class="slide" data-slide="23">
+<div class="s s-std" style="gap:34px">
+  <div class="topbar">
+    <div class="kicker">Slide 23 · Việc của buổi sau</div>
+    <div class="slide-num">23</div>
+  </div>
+  <h1 class="title" style="font-size:52px">Việc của buổi sau</h1>
+  <div class="flex-1 flex-col justify-center border-top">
+    <div style="display:grid;grid-template-columns:90px 1fr;gap:40px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:24px;color:var(--muted3);letter-spacing:.12em">01</span>
+      <span style="font-size:27px;font-weight:300;line-height:1.4"><b class="accent">Kiểm chứng 2N</b> — mỗi ứng viên top bằng ≥2 nguồn dữ liệu độc lập (không chỉ 1 người nói)</span>
+    </div>
+    <div style="display:grid;grid-template-columns:90px 1fr;gap:40px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:24px;color:var(--muted3);letter-spacing:.12em">02</span>
+      <span style="font-size:27px;font-weight:300;line-height:1.4"><b class="accent">Đo LƯỢNG thực tế của KSCL</b> — bao nhiêu mã DG/tháng, bao nhiêu lần kiểm kê, bao nhiêu xác nhận hao hụt → có vượt LỰC 1 người không?</span>
+    </div>
+    <div style="display:grid;grid-template-columns:90px 1fr;gap:40px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:24px;color:var(--muted3);letter-spacing:.12em">03</span>
+      <span style="font-size:27px;font-weight:300;line-height:1.4">Soi <b class="accent">5L cho Đĩa 2 và Đĩa 3</b> — tách LÀM/CHỜ, tìm LỆ THUỘC duy nhất mỗi flow, trả lời LƯỢNG > LỰC?</span>
+    </div>
+    <div style="display:grid;grid-template-columns:90px 1fr;gap:40px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:24px;color:var(--muted3);letter-spacing:.12em">04</span>
+      <span style="font-size:27px;font-weight:300;line-height:1.4">Chuẩn hóa ghi chép hành động sau họp P&L (điểm 2N = 16) + làm rõ vai trò ASM</span>
+    </div>
+    <div style="display:grid;grid-template-columns:90px 1fr;gap:40px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:24px;color:var(--muted3);letter-spacing:.12em">05</span>
+      <span style="font-size:27px;font-weight:300;line-height:1.4">Áp câu hỏi sàng thô: <b class="accent">"Nếu tháo điểm này, đầu ra có tăng không?"</b> cho từng ứng viên top</span>
+    </div>
+    <div style="display:grid;grid-template-columns:90px 1fr;gap:40px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--border-xlight)">
+      <span style="font-size:24px;color:var(--muted3);letter-spacing:.12em">06</span>
+      <span style="font-size:27px;font-weight:300;line-height:1.4">Kết luận đâu là "điểm nghẽn thật" → mới bắt đầu đề xuất cải tiến</span>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- /deck -->
+
+<div class="slide-counter" id="counter">1 / 23</div>
+<div class="nav-hint">← → hoặc nhấn để chuyển slide</div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const counter = document.getElementById('counter');
+  let current = 0;
+
+  function fit() {
+    const sw = window.innerWidth, sh = window.innerHeight;
+    const scale = Math.min(sw / 1920, sh / 1080);
+    slides.forEach(s => {
+      s.style.transform = `scale(${scale})`;
+    });
+  }
+
+  function go(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    counter.textContent = (current + 1) + ' / ' + total;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); go(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(current - 1); }
+    if (e.key === 'Home') { e.preventDefault(); go(0); }
+    if (e.key === 'End') { e.preventDefault(); go(total - 1); }
+  });
+
+  document.addEventListener('click', e => {
+    if (e.clientX > window.innerWidth / 2) go(current + 1);
+    else go(current - 1);
+  });
+
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) { dx < 0 ? go(current + 1) : go(current - 1); }
+  });
+
+  window.addEventListener('resize', fit);
+  fit();
+})();
+</script>
+</body>
+</html>
