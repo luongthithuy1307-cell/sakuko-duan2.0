@@ -1,0 +1,13 @@
+{
+  "name": "sakuko-bot-cskh",
+  "version": "1.0.0",
+  "description": "Bot Lark tra voucher CSKH Sakuko",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "test": "node test-voucher.js"
+  },
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.71.1"
+  }
+}

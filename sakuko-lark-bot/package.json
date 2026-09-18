@@ -1,0 +1,14 @@
+{
+  "name": "sakuko-lark-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bot Lark tra tồn kho Sakuko, hiểu câu hỏi bằng Groq",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "test": "node test-inventory.js"
+  },
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.28.0"
+  }
+}
