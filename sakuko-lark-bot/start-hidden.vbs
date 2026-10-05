@@ -1,2 +1,4 @@
-' Launch the bot auto-restart loop with NO visible console window.
-CreateObject("WScript.Shell").Run "cmd /c C:\Users\thuylt\Desktop\sakuko-lark-bot\run-bot.bat", 0, False
+' Chay bot an (khong hien cua so). Tu tim thu muc chua file nay -> chay dung du dat o C: hay D:
+Set fso = CreateObject("Scripting.FileSystemObject")
+folder = fso.GetParentFolderName(WScript.ScriptFullName)
+CreateObject("WScript.Shell").Run "cmd /c """ & folder & "\run-bot.bat""", 0, False
