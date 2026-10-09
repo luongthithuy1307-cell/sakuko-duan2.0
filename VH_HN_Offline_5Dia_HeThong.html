@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hệ thống Vận hành HN Offline — Nhìn thấy trước khi cải tiến</title>
+<style>
+:root {
+ --ink:#2b2320; --brown:#33241c; --paper:#f6f1e7; --paper2:#fffdf8;
+ --rust:#9c4a35; --gold:#d19a55; --line:#d8cec0; --soft:#eadfd1;
+ --green:#5b7c6f; --blue:#4771a3; --teal:#3f7b82; --violet:#6d668a; --rose:#8b4b5c;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,"Segoe UI",sans-serif;line-height:1.45}
+header{background:var(--brown);color:#fff;padding:54px 5vw 42px;position:relative;overflow:hidden}
+header:after{content:"";position:absolute;right:-80px;top:-120px;width:420px;height:420px;border:1px solid #ffffff24;border-radius:50%;box-shadow:0 0 0 70px #ffffff08,0 0 0 140px #ffffff05}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#e4b678;font-weight:800}
+h1{font-size:clamp(34px,5vw,70px);line-height:1.02;margin:10px 0 14px;max-width:1050px}
+.lead{font-size:clamp(15px,1.7vw,21px);color:#eadfd1;max-width:950px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;position:relative;z-index:2}
+.nav a{color:#fff;text-decoration:none;border:1px solid #ffffff38;padding:7px 11px;font-size:12px;border-radius:99px}
+main{width:min(1500px,94vw);margin:auto;padding:36px 0 80px}
+section{margin:0 0 46px}
+.sec-head{display:flex;gap:18px;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:20px}
+.sec-no{font-weight:900;font-size:14px;color:var(--rust);letter-spacing:.12em}
+h2{font-size:clamp(25px,3vw,40px);margin:0;line-height:1.1}
+h3{margin:0 0 8px}
+.note{background:#fff;border-left:5px solid var(--rust);padding:16px 18px;box-shadow:0 6px 24px #4b39220c}
+.rule4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.rule{background:#fff;border:1px solid var(--line);padding:18px;min-height:130px;position:relative}
+.rule .n{color:var(--rust);font-weight:900;font-size:12px;letter-spacing:.12em}
+.rule b{display:block;font-size:20px;margin:7px 0}
+.customer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:#fff;border:1px solid var(--line);padding:20px}
+.card small{color:var(--rust);font-weight:900;text-transform:uppercase;letter-spacing:.09em}
+.card ul{padding-left:18px;margin:10px 0 0}
+.mam{background:var(--brown);color:#fff;padding:24px;margin:14px 0 18px;text-align:center;border:1px solid #221914}
+.mam strong{color:#e5b571}
+.dishes{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.dish{background:#fff;border:1px solid var(--line);padding:18px;position:relative}
+.dish .tag{display:inline-block;font-size:11px;font-weight:900;color:#fff;padding:5px 8px;margin-bottom:10px}
+.dish h3{font-size:19px}
+.dish .for{color:#76665d;font-size:12px;margin-bottom:12px}
+.mons{display:grid;gap:6px}
+.mon{border:1px solid var(--line);background:var(--paper2);padding:10px}
+.mon b{display:block;font-size:12px}
+.mon span{font-size:11px;color:#6c5f58}
+.foundation{margin-top:14px;border:1px dashed #a79788;background:#eee8df;padding:16px}
+.flow-table{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.flow-card{background:#fff;border:1px solid var(--line);padding:16px}
+.flow-card .title{font-weight:900;margin-bottom:9px}
+.flowline{display:flex;gap:5px;align-items:center;flex-wrap:wrap;font-size:11px}
+.pill{padding:5px 7px;border:1px solid #d6cabc;background:#fffaf2}
+.pill.last{border-color:var(--rust);background:#f5e0d3;font-weight:800}
+.error-box{margin-top:10px;padding:9px 10px;border:1px dashed #c8b7a8;background:#fffaf4;font-size:10.5px;line-height:1.45}
+.error-box b{color:#9c4a35}
+.error-box .status{display:inline-block;margin-top:5px;padding:3px 6px;background:#f6e6dc;border:1px solid #d7b3a0;color:#8b4b35;font-weight:800;font-size:9.5px}
+.dia-section{margin:26px 0 34px;border:2px solid var(--dia);background:#fff;padding:0 16px 18px}
+.dia-title{margin:0 -16px 16px;padding:15px 18px;background:var(--dia);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.dia-title .q{font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;opacity:.9}
+.dia-title h3{font-size:22px;margin:3px 0 0}
+.dia-title .result{font-size:11px;max-width:420px;text-align:right}
+.dia1{--dia:#1f3864}.dia2{--dia:#3f7b82}.dia3{--dia:#e67e22}.dia4{--dia:#6c3483}.dia5{--dia:#c00000}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.step{background:#fff;border:1px solid var(--line);border-top:5px solid #777;padding:12px;min-height:168px}
+.step.d1{border-top-color:#1f3864} .step.d2{border-top-color:#3f7b82}
+.step.d3{border-top-color:#e67e22} .step.d4{border-top-color:#6c3483}
+.step.d5{border-top-color:#c00000}
+.step-top{display:flex;justify-content:space-between;align-items:center}
+.num{font-size:24px;font-weight:900;color:#b9afa5}
+.owner{font-size:10px;background:#f2ece4;padding:4px 6px}
+.step-name{font-size:15px;font-weight:900;margin:8px 0}
+.mini{font-size:11px;margin:5px 0} .muted{color:#786b63}
+.five-data{margin-top:9px;border-top:1px solid #e3d8cc;padding-top:8px;display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
+.five-data div{font-size:9.5px;background:#f7f3ed;border:1px solid #e5ddd3;padding:5px}
+.five-data b{color:#8b4b35}
+.five-data .wide{grid-column:1/-1}
+.five-empty{color:#9a6a52;font-style:italic}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.lens{background:#fff;border:1px solid var(--line);padding:14px}
+.lens b{display:block;color:var(--rust);font-size:17px;margin-bottom:5px}
+.lens p{font-size:12px;margin:0}
+.matrix-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.matrix{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;border:1px solid var(--line);min-height:330px;position:relative;background:#fff}
+.q-box{padding:23px;border:1px solid #e5dcd1}
+.q-box b{display:block;font-size:20px} .q-box small{color:#72645c}
+.q-box.priority{background:#f0d9ca;border:2px solid var(--rust)}
+.checks{background:var(--brown);color:#fff;padding:22px}
+.checks ol{padding-left:20px}
+.checks .bigq{font-size:24px;color:#e4b678;font-weight:900}
+.candidates{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.candidate{background:#fff;border:1px solid var(--line);padding:14px}
+.candidate strong{color:var(--rust)}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.kpi{background:#fff;border:1px solid var(--line);padding:16px}
+.kpi b{display:block;color:var(--rust);font-size:16px}
+.cadence{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cad{background:#fff;border:1px solid var(--line);padding:16px}
+.tobe{border:2px solid #5b7c6f;background:#f5f8f4;padding:20px}
+.tobe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tobe-card{background:#fff;border:1px solid #cdd8d1;padding:14px}
+.link-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:14px}
+.link-row{background:#fff;border-left:4px solid var(--rust);padding:12px 16px;font-size:13px}
+.source{font-size:11px;color:#756a63;border-top:1px solid var(--line);padding-top:18px;margin-top:45px}
+@media(max-width:1050px){
+ .dishes,.steps,.kpi-grid,.candidates{grid-template-columns:repeat(2,1fr)}
+ .grid5{grid-template-columns:repeat(3,1fr)} .rule4{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+ main{width:94vw} header{padding:38px 4vw}
+ .dishes,.customer-grid,.steps,.kpi-grid,.candidates,.grid5,.rule4,.flow-table,.matrix-wrap,.cadence,.tobe-grid{grid-template-columns:1fr}
+}
+@media print{.nav{display:none} body{background:#fff} section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">GIÁM ĐỐC VẬN HÀNH · BẢN VẼ HỆ THỐNG THEO PHƯƠNG PHÁP "NHÌN THẤY TRƯỚC KHI CẢI TIẾN"</div>
+  <h1>HỆ THỐNG VẬN HÀNH<br>CỬA HÀNG BÁN LẺ SAKUKO<br>HÀ NỘI OFFLINE</h1>
+  <div class="lead">Bản này tách rõ: <b>khách hàng</b>, <b>5 đĩa (đặt tên theo ĐẦU RA)</b>, <b>dòng chảy thực tế per đĩa</b>, sau đó soi <b>5L → 2N → kiểm chứng điểm nghẽn</b>. 22-23 cửa hàng · GĐVH: Lường Thị Thùy.</div>
+  <nav class="nav">
+    <a href="#logic">1. Logic</a><a href="#customers">2. Khách hàng</a><a href="#outputs">3. Mâm–5 Đĩa</a>
+    <a href="#flows">4. Dòng chảy + 5L</a><a href="#fiveL">5. 5L</a>
+    <a href="#twoN">6. 2N</a><a href="#links">7. Liên thông</a>
+    <a href="#dashboard">8. Dashboard</a><a href="#tobe">9. AI & Cải tiến</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- ════════════════════════════════════════ 01. LOGIC ════════════════════════════════════════ -->
+<section id="logic">
+ <div class="sec-head"><div class="sec-no">01</div><h2>Logic đúng: đừng bắt đầu bằng quy trình — bắt đầu bằng ĐẦU RA</h2></div>
+ <div class="rule4">
+  <div class="rule"><div class="n">BƯỚC 1</div><b>KHÁCH HÀNG</b><span>Ai là người nhận đầu ra của hệ thống vận hành cửa hàng?</span></div>
+  <div class="rule"><div class="n">BƯỚC 2</div><b>ĐĨA</b><span>Nhóm giá trị lớn mà từng nhóm khách hàng cần nhận — đặt tên theo OUTPUT.</span></div>
+  <div class="rule"><div class="n">BƯỚC 3</div><b>DÒNG CHẢY</b><span>Mỗi đĩa được tạo ra qua những bước thực tế nào: mở cửa, bổ kệ, tư vấn, thanh toán, báo cáo.</span></div>
+  <div class="rule"><div class="n">BƯỚC 4</div><b>5L → 2N</b><span>Gắn tem Lâu–Lượng–Lực–Lệ thuộc–Lỗi per bước. Dùng 2N chọn điểm nghẽn thực sự.</span></div>
+ </div>
+ <div class="note" style="margin-top:14px"><b>Nguyên tắc khóa (BGĐ):</b> "Cách nấu không phải là đĩa" — "Việc đang làm không phải là đầu ra". Đĩa phải đặt tên theo cái <b>khách hàng nhận được</b>, không phải việc nội bộ đang làm. Nếu phòng biến mất ngày mai, DN thiếu ĐẦU RA nào?</div>
+</section>
+
+<!-- ════════════════════════════════════════ 02. KHÁCH HÀNG ════════════════════════════════════════ -->
+<section id="customers">
+ <div class="sec-head"><div class="sec-no">02</div><h2>Khách hàng của "nhà máy Vận hành cửa hàng"</h2></div>
+ <div class="customer-grid">
+   <div class="card"><small>Khách hàng cuối cùng</small><h3>Người mua hàng tại cửa hàng</h3><ul><li>Cửa hàng sạch sẽ, mở cửa đúng giờ.</li><li>Tìm thấy đúng sản phẩm cần mua, giá minh bạch.</li><li>Được chào đón, tư vấn tận tâm theo chuẩn Omotenashi.</li><li>Thanh toán nhanh, đóng gói cẩn thận, muốn quay lại.</li></ul></div>
+   <div class="card"><small>Khách hàng nội bộ</small><h3>Nhân viên / QLST cửa hàng</h3><ul><li>Môi trường làm việc sẵn sàng, thiết bị hoạt động.</li><li>Biết bán gì, tư vấn gì, trưng bày thế nào.</li><li>Được đào tạo đủ kiến thức SP Nhật để tự tin phục vụ.</li><li>Có SOP rõ ràng, được đánh giá công bằng.</li></ul></div>
+   <div class="card"><small>Ban Giám đốc / Cổ đông</small><h3>Doanh nghiệp</h3><ul><li>Doanh thu đạt target per cửa hàng.</li><li>Năng suất NV đạt chuẩn (DT/NV).</li><li>Chi phí vận hành trong ngân sách.</li><li>Báo cáo đúng, kịp thời để ra quyết định.</li></ul></div>
+ </div>
+</section>
+
+<!-- ════════════════════════════════════════ 03. MÂM – 5 ĐĨA ════════════════════════════════════════ -->
+<section id="outputs">
+ <div class="sec-head"><div class="sec-no">03</div><h2>Mâm – 5 Đĩa: đặt tên theo ĐẦU RA, không theo phòng ban</h2></div>
+ <div class="mam"><div class="eyebrow">MÂM VẬN HÀNH</div><strong>Hệ thống tròn khép kín gồm 5 trụ cột huyết mạch để vận hành trơn tru một cửa hàng bán lẻ tiêu chuẩn Nhật Bản</strong></div>
+
+<div class="dishes">
+  <div class="dish">
+    <span class="tag" style="background:#1f3864">ĐĨA 1</span>
+    <h3>Cửa hàng sẵn sàng phục vụ</h3>
+    <div class="for">KH vào thấy sẵn sàng không?</div>
+    <div class="mons">
+      <div class="mon"><b>M1 · CH mở cửa đúng giờ</b><span>Mở cửa theo checklist, đúng giờ cam kết.</span></div>
+      <div class="mon"><b>M2 · CH sạch, ngăn nắp</b><span>Không gian sạch sẽ, thiết bị hoạt động.</span></div>
+      <div class="mon"><b>M3 · Thiết bị ổn định</b><span>Điều hòa, POS, cửa cuốn, đèn hoạt động.</span></div>
+      <div class="mon"><b>M4 · Ca kíp đủ định biên</b><span>Bàn giao ca đủ thông tin, đủ người.</span></div>
+    </div>
+  </div>
+
+  <div class="dish">
+    <span class="tag" style="background:#3f7b82">ĐĨA 2</span>
+    <h3>Đúng hàng – Đủ hàng – Đúng trưng bày</h3>
+    <div class="for">KH có tìm thấy SP cần mua không?</div>
+    <div class="mons">
+      <div class="mon"><b>M5 · Hàng có sẵn trên kệ</b><span>Fill rate kệ hàng đầu ngày.</span></div>
+      <div class="mon"><b>M6 · Trưng bày đúng POG</b><span>Planogram, FIFO, facing chuẩn.</span></div>
+      <div class="mon"><b>M7 · CTKM triển khai đúng</b><span>Tem giá, POSM đúng thời điểm.</span></div>
+      <div class="mon"><b>M8 · HSD được quản lý</b><span>SP cận/hết hạn được rút kịp thời.</span></div>
+    </div>
+  </div>
+
+  <div class="dish">
+    <span class="tag" style="background:#e67e22">ĐĨA 3</span>
+    <h3>Nhân viên đúng chuẩn phục vụ</h3>
+    <div class="for">KH có được tư vấn tốt không?</div>
+    <div class="mons">
+      <div class="mon"><b>M9 · NV am hiểu hàng Nhật</b><span>Biết công dụng, cách dùng SP.</span></div>
+      <div class="mon"><b>M10 · Tư vấn & chốt sale</b><span>Cross-sell, upsell, SP/Bill ≥ 3.</span></div>
+      <div class="mon"><b>M11 · NV mới độc lập nhanh</b><span>Onboarding 2 tuần + Buddy system.</span></div>
+      <div class="mon"><b>M12 · Đánh giá năng lực</b><span>Chấm điểm tháng, phân loại A/B/C/D.</span></div>
+    </div>
+  </div>
+
+  <div class="dish">
+    <span class="tag" style="background:#6c3483">ĐĨA 4</span>
+    <h3>Khách mua thuận tiện, hài lòng</h3>
+    <div class="for">KH có muốn quay lại không?</div>
+    <div class="mons">
+      <div class="mon"><b>M13 · Tìm SP nhanh (&lt;2p)</b><span>NV dẫn KH tìm SP ngay.</span></div>
+      <div class="mon"><b>M14 · Thanh toán không chờ</b><span>POS nhanh, đóng gói 4 cỡ túi.</span></div>
+      <div class="mon"><b>M15 · Khách cũ quay lại</b><span>Loyalty, chăm sóc KH cũ.</span></div>
+      <div class="mon"><b>M16 · Xử lý khiếu nại nhanh</b><span>SOP xử lý, thời gian &lt;30p.</span></div>
+    </div>
+  </div>
+
+  <div class="dish">
+    <span class="tag" style="background:#c00000">ĐĨA 5</span>
+    <h3>DT – Năng suất – Chi phí đạt mục tiêu</h3>
+    <div class="for">DN nhận kết quả KD mục tiêu không?</div>
+    <div class="mons">
+      <div class="mon"><b>M17 · DT đạt target</b><span>Chẩn đoán khi DT lệch.</span></div>
+      <div class="mon"><b>M18 · Năng suất NV đạt chuẩn</b><span>DT/NV per CH.</span></div>
+      <div class="mon"><b>M19 · Chi phí trong ngân sách</b><span>So sánh thực tế vs budget.</span></div>
+      <div class="mon"><b>M20 · BGĐ nhìn đúng tình trạng</b><span>Báo cáo hoàn chỉnh, kịp thời.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="mam" style="margin-top:14px">
+  <div class="eyebrow">KẾT QUẢ CUỐI CÙNG</div>
+  <strong>Khách hàng hài lòng + Doanh thu đạt + Đội ngũ vững + Hệ thống nhân rộng được</strong>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════ 04. DÒNG CHẢY + 5L ════════════════════════════════════════ -->
+<section id="flows">
+ <div class="sec-head"><div class="sec-no">04</div><h2>Dòng chảy HIỆN TRẠNG theo 5 Đĩa + dữ liệu 5L</h2></div>
+
+ <div class="note">
+   <b>Đọc theo 5 Đĩa đã chốt:</b> Mỗi nhóm bước dưới đây được đặt dưới đúng Đĩa mà nó phục vụ.
+   Trong từng bước đã bổ sung dữ liệu <b>LÂU – LƯỢNG – LỰC – LỆ THUỘC – LỖI</b>.
+   Các trường "Chưa đo lường" được giữ nguyên để đội nhóm biết chính xác dữ liệu nào còn thiếu.
+ </div>
+
+ <!-- ĐĨA 1 -->
+ <div class="dia-section dia1">
+   <div class="dia-title">
+     <div><div class="q">ĐĨA 1 · CỬA HÀNG SẴN SÀNG PHỤC VỤ</div><h3>Khách hàng vào thấy sẵn sàng không?</h3></div>
+     <div class="result">KH nhận: Không gian sạch sẽ, mở cửa đúng giờ · NV/QLST nhận: Môi trường, thiết bị đủ điều kiện làm việc.</div>
+   </div>
+
+   <div class="flow-table">
+     <div class="flow-card">
+       <div class="title">M1 · CH mở cửa đúng giờ</div>
+       <div class="flowline"><span class="pill">Checklist mở cửa</span>→<span class="pill">QLST/NV thực hiện</span>→<span class="pill">Kiểm tra từng hạng mục</span>→<span class="pill last">CH sẵn sàng đón khách</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> Tỷ lệ CH mở trễ giờ; % checklist không hoàn thành; số lần thiếu người mở cửa.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M2 · CH sạch, ngăn nắp</div>
+       <div class="flowline"><span class="pill">Danh mục thiết bị</span>→<span class="pill">QLST kiểm tra</span>→<span class="pill">Phát hiện lỗi</span>→<span class="pill">Báo IT/bảo trì</span>→<span class="pill last">Thiết bị hoạt động</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> % thiết bị lỗi per CH; thời gian sửa chữa trung bình; số lần POS/điều hòa hỏng đầu ngày.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M3 · Thiết bị ổn định</div>
+       <div class="flowline"><span class="pill">Kệ trống + tồn kho</span>→<span class="pill">NV kiểm tra</span>→<span class="pill">Bổ kệ từ kho ngầm</span>→<span class="pill last">Kệ đầy hàng đầu ngày</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> Fill rate kệ đầu ngày; % kệ trống quá 2 tiếng; số SKU hết trên kệ nhưng còn trong kho.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M4 · Ca kíp đủ định biên</div>
+       <div class="flowline"><span class="pill">Sổ bàn giao ca trước</span>→<span class="pill">QLST nhận</span>→<span class="pill">Kiểm tra thông tin</span>→<span class="pill last">NV nắm đủ info để làm việc</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> % bàn giao thiếu thông tin; số lần thiếu người đầu ca; tỷ lệ NV đi muộn.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+   </div>
+
+   <div class="steps" style="margin-top:14px">
+     <div class="step d1"><div class="step-top"><span class="num">01</span><span class="owner">QLST/NV</span></div><div class="step-name">Mở cửa theo checklist</div><div class="mini"><b>Đầu ra:</b> CH sẵn sàng</div>
+       <div class="five-data"><div><b>LÂU</b><br>15 phút</div><div><b>LƯỢNG</b><br>1 CH/lần</div><div><b>LỰC</b><br>1 người × 15 phút = <b>15 phút</b></div><div><b>LỆ THUỘC</b><br>Ca trước bàn giao</div><div class="wide"><b>LỖI</b><br>% CH mở trễ giờ<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d1"><div class="step-top"><span class="num">02</span><span class="owner">QLST</span></div><div class="step-name">Kiểm tra thiết bị</div><div class="mini"><b>Đầu ra:</b> TB hoạt động</div>
+       <div class="five-data"><div><b>LÂU</b><br>10 phút</div><div><b>LƯỢNG</b><br>Danh mục TB per CH</div><div><b>LỰC</b><br>1 người × 10 phút = <b>10 phút</b></div><div><b>LỆ THUỘC</b><br>IT/bảo trì nếu hỏng</div><div class="wide"><b>LỖI</b><br>% TB lỗi per CH<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d1"><div class="step-top"><span class="num">03</span><span class="owner">NV</span></div><div class="step-name">Kiểm tra kệ & bổ kệ</div><div class="mini"><b>Đầu ra:</b> Kệ đầy hàng</div>
+       <div class="five-data"><div><b>LÂU</b><br>20 phút</div><div><b>LƯỢNG</b><br>Kệ trống per CH</div><div><b>LỰC</b><br>1-2 người × 20 phút = <b>20-40 phút</b></div><div><b>LỆ THUỘC</b><br>Hàng trong kho</div><div class="wide"><b>LỖI</b><br>Fill rate đầu ngày<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d1"><div class="step-top"><span class="num">04</span><span class="owner">QLST</span></div><div class="step-name">Bàn giao ca</div><div class="mini"><b>Đầu ra:</b> NV nắm thông tin</div>
+       <div class="five-data"><div><b>LÂU</b><br>10 phút</div><div><b>LƯỢNG</b><br>1 lần/ca</div><div><b>LỰC</b><br>2 người × 10 phút = <b>20 phút</b></div><div><b>LỆ THUỘC</b><br>Ca trước ghi đủ</div><div class="wide"><b>LỖI</b><br>% bàn giao thiếu<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+   </div>
+
+   <div class="note" style="margin-top:12px;border-left-color:#1f3864"><b>Tổng lực lượng Đĩa 1:</b> 2-3 nhân sự + 1 QLST · Tổng tiêu hao ~285 phút/ngày (checklist + thiết bị + bổ kệ + bàn giao × 2 ca).</div>
+ </div>
+
+ <!-- ĐĨA 2 -->
+ <div class="dia-section dia2">
+   <div class="dia-title">
+     <div><div class="q">ĐĨA 2 · ĐÚNG HÀNG – ĐỦ HÀNG – ĐÚNG TRƯNG BÀY</div><h3>Khách có tìm thấy SP cần mua không?</h3></div>
+     <div class="result">KH nhận: Đúng SP, giá minh bạch · Ngành hàng: Bảo toàn danh mục hàng hóa bán ra.</div>
+   </div>
+
+   <div class="flow-table">
+     <div class="flow-card">
+       <div class="title">M5 · Hàng có sẵn trên kệ</div>
+       <div class="flowline"><span class="pill">Kệ hàng + tồn kho</span>→<span class="pill">NV kiểm đầu ngày</span>→<span class="pill">Xác định SP thiếu</span>→<span class="pill">Bổ kệ từ kho</span>→<span class="pill last">Kệ đầy, KH mua được</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> Fill rate per ngành hàng; % SKU hết trên kệ; tỷ lệ OOS per CH.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M6 · Trưng bày đúng POG</div>
+       <div class="flowline"><span class="pill">Hướng dẫn POG + SP</span>→<span class="pill">NV thực hiện</span>→<span class="pill">Trưng bày + FIFO</span>→<span class="pill last">Kệ hoàn thành chuẩn</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> % trưng bày đúng POG; số lần sai FIFO; % CH đạt chuẩn trưng bày.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M7 · CTKM triển khai đúng</div>
+       <div class="flowline"><span class="pill">POSM + tem giá</span>→<span class="pill">NV gắn</span>→<span class="pill">Trưng bày KM</span>→<span class="pill">Kiểm tra</span>→<span class="pill last">CH triển khai đúng</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> % gắn sai tem giá; % CTKM triển khai trễ; số lần KH phản ánh giá sai.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M8 · HSD được quản lý</div>
+       <div class="flowline"><span class="pill">DS SP cận hạn</span>→<span class="pill">NV kiểm tra</span>→<span class="pill">Rút khỏi kệ</span>→<span class="pill last">Không SP hết hạn trên kệ</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> Số SP hết hạn sót trên kệ; % SP cận hạn không được xử lý kịp; tỷ lệ hủy do HSD.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+   </div>
+
+   <div class="steps" style="margin-top:14px">
+     <div class="step d2"><div class="step-top"><span class="num">05</span><span class="owner">NV</span></div><div class="step-name">Kiểm tồn kệ đầu ngày</div><div class="mini"><b>Đầu ra:</b> SP thiếu trên kệ</div>
+       <div class="five-data"><div><b>LÂU</b><br>20 phút</div><div><b>LƯỢNG</b><br>Kệ hàng per CH</div><div><b>LỰC</b><br>1 người × 20 phút = <b>20 phút</b></div><div><b>LỆ THUỘC</b><br>—</div><div class="wide"><b>LỖI</b><br>Fill rate per ngành<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d2"><div class="step-top"><span class="num">06</span><span class="owner">NV</span></div><div class="step-name">Trưng bày theo POG + FIFO</div><div class="mini"><b>Đầu ra:</b> Kệ hoàn thành</div>
+       <div class="five-data"><div><b>LÂU</b><br>60 phút</div><div><b>LƯỢNG</b><br>SP + kệ per CH</div><div><b>LỰC</b><br>1-2 người × 60 phút = <b>60-120 phút</b></div><div><b>LỆ THUỘC</b><br>SP đủ, kệ chuẩn</div><div class="wide"><b>LỖI</b><br>% trưng bày đúng<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d2"><div class="step-top"><span class="num">07</span><span class="owner">NV</span></div><div class="step-name">Gắn tem/POSM</div><div class="mini"><b>Đầu ra:</b> CTKM triển khai</div>
+       <div class="five-data"><div><b>LÂU</b><br>60 phút</div><div><b>LƯỢNG</b><br>POSM + tem per CH</div><div><b>LỰC</b><br>2 người × 60 phút = <b>120 phút</b></div><div><b>LỆ THUỘC</b><br>POSM đủ, tem in kịp</div><div class="wide"><b>LỖI</b><br>% gắn sai tem giá<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d2"><div class="step-top"><span class="num">08</span><span class="owner">NV</span></div><div class="step-name">Thu hồi SP cận/hết hạn</div><div class="mini"><b>Đầu ra:</b> SP rút khỏi kệ</div>
+       <div class="five-data"><div><b>LÂU</b><br>15 phút</div><div><b>LƯỢNG</b><br>SP cận hạn per CH</div><div><b>LỰC</b><br>1 người × 15 phút = <b>15 phút</b></div><div><b>LỆ THUỘC</b><br>—</div><div class="wide"><b>LỖI</b><br>Số SP hết hạn sót<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+   </div>
+
+   <div class="note" style="margin-top:12px;border-left-color:#3f7b82"><b>Tổng lực lượng Đĩa 2:</b> 1-2 NV × 60-90 phút/ngày · <b>Lệ thuộc nặng:</b> Định mức tồn kho, lịch xe tuyến kho tổng, thời gian duyệt TO của ASM (chờ 2-4 tiếng duyệt, 1-2 ngày xe giao).</div>
+ </div>
+
+ <!-- ĐĨA 3 -->
+ <div class="dia-section dia3">
+   <div class="dia-title">
+     <div><div class="q">ĐĨA 3 · NHÂN VIÊN ĐÚNG CHUẨN PHỤC VỤ</div><h3>Khách có được tư vấn tốt không?</h3></div>
+     <div class="result">KH nhận: Chào đón, tư vấn Omotenashi · BGĐ: Đội ngũ tạo doanh thu chuẩn mực.</div>
+   </div>
+
+   <div class="flow-table">
+     <div class="flow-card">
+       <div class="title">M9 · NV am hiểu hàng Nhật</div>
+       <div class="flowline"><span class="pill">Tài liệu SP</span>→<span class="pill">Đào tạo per ngành</span>→<span class="pill">Test quiz</span>→<span class="pill last">NV hiểu SP để tư vấn</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> % NV chưa hoàn thành đào tạo; % không đạt quiz; % tư vấn sai thông tin SP.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M10 · Tư vấn & chốt sale</div>
+       <div class="flowline"><span class="pill">SP chính</span>→<span class="pill">NV gợi ý SP liên quan</span>→<span class="pill">Cross-sell</span>→<span class="pill last">KH mua thêm (SP/Bill ≥ 3)</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> SP/Bill trung bình; tỷ lệ cross-sell thành công; TBB per NV.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M11 · NV mới độc lập nhanh</div>
+       <div class="flowline"><span class="pill">NV mới</span>→<span class="pill">Buddy kèm 2 tuần</span>→<span class="pill">Thực hành SOP</span>→<span class="pill">Test</span>→<span class="pill last">NV nắm SOP, độc lập</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> <b style="color:#c00000">Tỷ lệ NV mới nghỉ trong thử thách: 54%</b>; thời gian để NV mới độc lập; % NV mới đạt SOP sau 2 tuần.<br><span class="status">HIỆN TẠI: 54% — NGHẼN LỚN</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M12 · Đánh giá năng lực</div>
+       <div class="flowline"><span class="pill">Bộ tiêu chí</span>→<span class="pill">QLST chấm điểm</span>→<span class="pill">Phân loại A/B/C/D</span>→<span class="pill last">Lộ trình đào tạo per NV</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> % NV được chấm đúng hạn; % CH có QLST đánh giá đều; độ chênh lệch điểm giữa QLST.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+   </div>
+
+   <div class="steps" style="margin-top:14px">
+     <div class="step d3"><div class="step-top"><span class="num">09</span><span class="owner">QLST/ASM</span></div><div class="step-name">Đào tạo SP per ngành</div><div class="mini"><b>Đầu ra:</b> NV hiểu SP</div>
+       <div class="five-data"><div><b>LÂU</b><br>1-2 giờ/đợt</div><div><b>LƯỢNG</b><br>5-10 NV/đợt</div><div><b>LỰC</b><br>5-10 NV × 60 phút = <b>300-600 phút/đợt</b></div><div><b>LỆ THUỘC</b><br>Sắp xếp lịch</div><div class="wide"><b>LỖI</b><br>% NV đào tạo đủ<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d3"><div class="step-top"><span class="num">10</span><span class="owner">NV</span></div><div class="step-name">Cross-sell / upsell</div><div class="mini"><b>Đầu ra:</b> KH mua thêm</div>
+       <div class="five-data"><div><b>LÂU</b><br>1-2 phút/KH</div><div><b>LƯỢNG</b><br>Mỗi KH</div><div><b>LỰC</b><br>1 NV × 1-2 phút</div><div><b>LỆ THUỘC</b><br>NV biết SP</div><div class="wide"><b>LỖI</b><br>SP/Bill trung bình<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d3"><div class="step-top"><span class="num">11</span><span class="owner">Buddy</span></div><div class="step-name">Đào tạo on-job 2 tuần</div><div class="mini"><b>Đầu ra:</b> NV nắm SOP</div>
+       <div class="five-data"><div><b>LÂU</b><br>80 giờ (2 tuần)</div><div><b>LƯỢNG</b><br>1 NV mới/Buddy</div><div><b>LỰC</b><br>2 người × 40 giờ = <b>4,800 phút/NV mới</b></div><div><b>LỆ THUỘC</b><br>Buddy rảnh</div><div class="wide"><b>LỖI</b><br><b style="color:#c00000">54% NV mới nghỉ thử thách</b><br><span class="five-empty">NGHẼN LỚN — đo được</span></div></div></div>
+     <div class="step d3"><div class="step-top"><span class="num">12</span><span class="owner">QLST</span></div><div class="step-name">Chấm năng lực tháng</div><div class="mini"><b>Đầu ra:</b> Điểm năng lực NV</div>
+       <div class="five-data"><div><b>LÂU</b><br>1 giờ/tháng</div><div><b>LƯỢNG</b><br>NV per CH</div><div><b>LỰC</b><br>1 người × 60 phút = <b>60 phút/tháng</b></div><div><b>LỆ THUỘC</b><br>Tiêu chí chuẩn</div><div class="wide"><b>LỖI</b><br>% NV chấm đúng<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+   </div>
+
+   <div class="note" style="margin-top:12px;border-left-color:#e67e22"><b>Tổng lực lượng Đĩa 3:</b> Toàn bộ nhân sự CH · <b>Lệ thuộc:</b> Tài liệu đào tạo từ Ngành hàng + ý thức kỷ luật cá nhân · <b style="color:#c00000">NGHẼN: 54% NV mới nghỉ → thiếu người kèm cặp → không đủ năng lực tư vấn hàng Nhật phức tạp.</b></div>
+ </div>
+
+ <!-- ĐĨA 4 -->
+ <div class="dia-section dia4">
+   <div class="dia-title">
+     <div><div class="q">ĐĨA 4 · KHÁCH MUA THUẬN TIỆN, HÀI LÒNG</div><h3>Khách có muốn quay lại không?</h3></div>
+     <div class="result">KH nhận: Trải nghiệm mượt mà, thanh toán nhanh · DN: Gia tăng tỷ lệ KH trung thành (Loyalty).</div>
+   </div>
+
+   <div class="flow-table">
+     <div class="flow-card">
+       <div class="title">M13 · Tìm SP nhanh (&lt;2 phút)</div>
+       <div class="flowline"><span class="pill">KH hỏi SP</span>→<span class="pill">NV dẫn đến kệ</span>→<span class="pill last">KH thấy SP (&lt;2 phút)</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> Số lượt KH hỏi/ngày; thời gian tìm SP trung bình; % KH không tìm thấy SP.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M14 · Thanh toán không chờ</div>
+       <div class="flowline"><span class="pill">Hóa đơn</span>→<span class="pill">Quét mã</span>→<span class="pill">Thanh toán</span>→<span class="pill">Tích điểm</span>→<span class="pill">Đóng gói (4 cỡ túi)</span>→<span class="pill">Cúi chào</span>→<span class="pill last">KH hài lòng ra về</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> Thời gian chờ xếp hàng giờ cao điểm; tỷ lệ lệch tiền mặt; % lỗi thanh toán.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M15 · Khách cũ quay lại</div>
+       <div class="flowline"><span class="pill">Data POS/CRM</span>→<span class="pill">Phân loại KH</span>→<span class="pill">Chăm sóc + ưu đãi</span>→<span class="pill last">KH thân thiết quay lại</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> Tỷ lệ KH quay lại / mất; tần suất mua per KH; % KH vãng lai vs KH mới vs KH thân thiết.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M16 · Xử lý khiếu nại nhanh</div>
+       <div class="flowline"><span class="pill">KH khiếu nại</span>→<span class="pill">QLST phân loại</span>→<span class="pill">Áp SOP</span>→<span class="pill last">Giải quyết (&lt;30 phút)</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> Thời gian xử lý KN trung bình; % KN chưa giải quyết; số KN lặp lại cùng loại.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG</span></div>
+     </div>
+   </div>
+
+   <div class="steps" style="margin-top:14px">
+     <div class="step d4"><div class="step-top"><span class="num">13</span><span class="owner">NV</span></div><div class="step-name">Hướng dẫn KH tìm SP</div><div class="mini"><b>Đầu ra:</b> KH thấy SP</div>
+       <div class="five-data"><div><b>LÂU</b><br>1-2 phút</div><div><b>LƯỢNG</b><br>Mỗi KH hỏi</div><div><b>LỰC</b><br>1 NV × 1-2 phút</div><div><b>LỆ THUỘC</b><br>NV biết vị trí</div><div class="wide"><b>LỖI</b><br>Số lượt KH hỏi/ngày<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d4"><div class="step-top"><span class="num">14</span><span class="owner">Thu ngân</span></div><div class="step-name">Thanh toán & đóng gói</div><div class="mini"><b>Đầu ra:</b> Thanh toán xong</div>
+       <div class="five-data"><div><b>LÂU</b><br>1-2 phút</div><div><b>LƯỢNG</b><br>Mỗi KH</div><div><b>LỰC</b><br>1 thu ngân × 1-2 phút</div><div><b>LỆ THUỘC</b><br>Máy POS/QR</div><div class="wide"><b>LỖI</b><br>% lỗi thanh toán<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d4"><div class="step-top"><span class="num">15</span><span class="owner">GĐVH</span></div><div class="step-name">Phân loại & chăm sóc KH</div><div class="mini"><b>Đầu ra:</b> KH nhận ưu đãi</div>
+       <div class="five-data"><div><b>LÂU</b><br>2 giờ/tháng</div><div><b>LƯỢNG</b><br>Data giao dịch</div><div><b>LỰC</b><br>1 người × 120 phút = <b>120 phút/tháng</b></div><div><b>LỆ THUỘC</b><br>Data POS đủ</div><div class="wide"><b>LỖI</b><br>Tỷ lệ KH quay lại / mất<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d4"><div class="step-top"><span class="num">16</span><span class="owner">QLST</span></div><div class="step-name">Xử lý khiếu nại</div><div class="mini"><b>Đầu ra:</b> Giải quyết KN</div>
+       <div class="five-data"><div><b>LÂU</b><br>15-30 phút</div><div><b>LƯỢNG</b><br>Mỗi KN</div><div><b>LỰC</b><br>1 người × 20 phút = <b>20 phút/KN</b></div><div><b>LỆ THUỘC</b><br>SOP rõ ràng</div><div class="wide"><b>LỖI</b><br>Thời gian xử lý<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+   </div>
+
+   <div class="note" style="margin-top:12px;border-left-color:#6c3483"><b>Tổng lực lượng Đĩa 4:</b> Thu ngân + NV bán hàng trực quầy · <b>Lệ thuộc:</b> Phần mềm POS, mạng internet, kỹ năng thao tác thu ngân · <b style="color:#c00000">NGHẼN: Quá tải thanh toán giờ cao điểm + thiếu cơ chế chẩn đoán KH cũ quay lại.</b></div>
+ </div>
+
+ <!-- ĐĨA 5 -->
+ <div class="dia-section dia5">
+   <div class="dia-title">
+     <div><div class="q">ĐĨA 5 · DT – NĂNG SUẤT – CHI PHÍ ĐẠT MỤC TIÊU</div><h3>DN nhận kết quả KD mục tiêu không?</h3></div>
+     <div class="result">BGĐ/Cổ đông nhận: Kết quả KD chuẩn xác, kiểm soát chi phí, ra quyết định kịp thời.</div>
+   </div>
+
+   <div class="flow-table">
+     <div class="flow-card">
+       <div class="title">M17 · Doanh thu đạt target</div>
+       <div class="flowline"><span class="pill">DT lệch target</span>→<span class="pill">GĐVH chẩn đoán</span>→<span class="pill">Phân tích root cause</span>→<span class="pill last">Nguyên nhân + action</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> <b style="color:#c00000">100% chưa đo — chẩn đoán hoàn toàn bằng kinh nghiệm và Excel thủ công.</b><br><span class="status">HIỆN TẠI: 100% THỦ CÔNG — NGHẼN LỚN NHẤT</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M18 · Năng suất NV đạt chuẩn</div>
+       <div class="flowline"><span class="pill">CH năng suất kém</span>→<span class="pill">ASM/GĐVH phân tích</span>→<span class="pill">Root cause</span>→<span class="pill last">Cải thiện năng suất</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> DT/NV per CH; năng suất theo ca; % CH dưới chuẩn.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG (bằng tay hoàn toàn)</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M19 · Chi phí trong ngân sách</div>
+       <div class="flowline"><span class="pill">Chi phí thực tế</span>→<span class="pill">So sánh budget</span>→<span class="pill">Phát hiện vượt</span>→<span class="pill last">% vượt/đạt per hạng mục</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> % vượt budget per hạng mục; chi phí per m²; chi phí per đơn hàng.<br><span class="status">HIỆN TẠI: CHƯA ĐO LƯỜNG chi tiết</span></div>
+     </div>
+     <div class="flow-card">
+       <div class="title">M20 · BGĐ nhìn đúng tình trạng</div>
+       <div class="flowline"><span class="pill">Data 4 đĩa</span>→<span class="pill">Gom thủ công</span>→<span class="pill">Xử lý Excel</span>→<span class="pill">Tạo báo cáo</span>→<span class="pill last">Trình BGĐ</span></div>
+       <div class="error-box"><b>LỖI – Chỉ số cần đo:</b> <b style="color:#c00000">GĐVH mất 15-20 giờ/tháng chỉ để gom số liệu và làm báo cáo thủ công.</b><br><span class="status">HIỆN TẠI: MẤT 15-20h/THÁNG — NGHẼN LỚN</span></div>
+     </div>
+   </div>
+
+   <div class="steps" style="margin-top:14px">
+     <div class="step d5"><div class="step-top"><span class="num">17</span><span class="owner">GĐVH</span></div><div class="step-name">Chẩn đoán khi DT lệch</div><div class="mini"><b>Đầu ra:</b> Root cause</div>
+       <div class="five-data"><div><b>LÂU</b><br>2-4 giờ</div><div><b>LƯỢNG</b><br>Gap DT per CH</div><div><b>LỰC</b><br>1 người × 180 phút = <b>180 phút/lần</b></div><div><b>LỆ THUỘC</b><br>100% thủ công</div><div class="wide"><b>LỖI</b><br><b style="color:#c00000">100% chưa đo (Nghẽn lớn)</b></div></div></div>
+     <div class="step d5"><div class="step-top"><span class="num">18</span><span class="owner">ASM/GĐVH</span></div><div class="step-name">Phân tích năng suất</div><div class="mini"><b>Đầu ra:</b> Root cause per CH</div>
+       <div class="five-data"><div><b>LÂU</b><br>2 giờ</div><div><b>LƯỢNG</b><br>CH bottom</div><div><b>LỰC</b><br>1-2 người × 120 phút = <b>120-240 phút</b></div><div><b>LỆ THUỘC</b><br>ASM kiểm tra</div><div class="wide"><b>LỖI</b><br>Bằng tay hoàn toàn<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d5"><div class="step-top"><span class="num">19</span><span class="owner">GĐVH</span></div><div class="step-name">Theo dõi chi phí</div><div class="mini"><b>Đầu ra:</b> Báo cáo CP</div>
+       <div class="five-data"><div><b>LÂU</b><br>1 giờ</div><div><b>LƯỢNG</b><br>Chứng từ per CH</div><div><b>LỰC</b><br>1 người × 60 phút = <b>60 phút</b></div><div><b>LỆ THUỘC</b><br>Kế toán cung cấp</div><div class="wide"><b>LỖI</b><br>Chi tiết per hạng mục<br><span class="five-empty">Chưa đo lường</span></div></div></div>
+     <div class="step d5"><div class="step-top"><span class="num">20</span><span class="owner">GĐVH</span></div><div class="step-name">Tổng hợp & báo cáo BGĐ</div><div class="mini"><b>Đầu ra:</b> Báo cáo hoàn chỉnh</div>
+       <div class="five-data"><div><b>LÂU</b><br>8-15 giờ</div><div><b>LƯỢNG</b><br>Data thô toàn chuỗi</div><div><b>LỰC</b><br>1 người × 600 phút = <b>600 phút/tháng</b></div><div><b>LỆ THUỘC</b><br>Làm thủ công 100%</div><div class="wide"><b>LỖI</b><br><b style="color:#c00000">Mất 15-20h/tháng làm báo cáo</b></div></div></div>
+   </div>
+
+   <div class="note" style="margin-top:12px;border-left-color:#c00000"><b>Tổng lực lượng Đĩa 5:</b> GĐVH + Kế toán + ASM · <b>Lệ thuộc:</b> Dữ liệu rải rác từ nhiều nguồn, làm thủ công trên Excel · <b style="color:#c00000">NGHẼN NẶNG NHẤT: 100% chẩn đoán thủ công + 15-20h/tháng chỉ gom số liệu → GĐVH không còn thời gian đi thị trường.</b></div>
+ </div>
+
+</section>
+
+<!-- ════════════════════════════════════════ 05. 5L ════════════════════════════════════════ -->
+<section id="fiveL">
+ <div class="sec-head"><div class="sec-no">05</div><h2>Tem 5L: gắn dưới TỪNG BƯỚC, không đánh giá chung chung</h2></div>
+ <div class="grid5">
+   <div class="lens"><b>LÂU</b><p>Thời gian xử lý + thời gian chờ. Phải tách "làm" và "chờ" rõ ràng.</p></div>
+   <div class="lens"><b>LƯỢNG</b><p>Bao nhiêu đơn vị đi vào → qua bước → đi ra. VD: số KH, số SP, số CH.</p></div>
+   <div class="lens"><b>LỰC</b><p>Số người × phút xử lý thực tế = Tổng phút nguồn lực. Phần chờ không tính.</p></div>
+   <div class="lens"><b>LỆ THUỘC</b><p>Ai/cái gì có thể làm dòng dừng: IT/bảo trì, kho tổng, ASM duyệt TO, NCC.</p></div>
+   <div class="lens"><b>LỖI</b><p>Sai + làm lại + mất. Đo bằng tỷ lệ: % CH mở trễ, % NV nghỉ, % OOS.</p></div>
+ </div>
+ <div class="note" style="margin-top:14px"><b>Câu đọc ngang:</b> Dòng chảy đang đi như thế nào? &nbsp; <b>Câu đọc dọc:</b> Bước nào cả 5L cùng xấu? &nbsp; <b>Cặp câu hỏi khóa:</b> "LƯỢNG có vượt LỰC không?" — "Nếu tháo điểm này, đầu ra toàn hệ thống có tăng không?"</div>
+</section>
+
+<!-- ════════════════════════════════════════ 06. 2N ════════════════════════════════════════ -->
+<section id="twoN">
+ <div class="sec-head"><div class="sec-no">06</div><h2>2N để CHỌN — rồi 1 câu để CHỐT điểm nghẽn</h2></div>
+ <div class="matrix-wrap">
+  <div class="matrix">
+   <div class="q-box"><b>Theo dõi</b><small>Ít xảy ra nhưng ảnh hưởng nặng.</small></div>
+   <div class="q-box priority"><b>ƯU TIÊN</b><small>Vừa NHIỀU × vừa NẶNG. Chọn 1-3 ứng viên kiểm chứng.</small></div>
+   <div class="q-box"><b>Bỏ qua tạm</b><small>Ít xảy ra, ảnh hưởng nhẹ.</small></div>
+   <div class="q-box"><b>Xử lý nhanh khi tiện</b><small>Xảy ra nhiều nhưng tác động nhẹ.</small></div>
+  </div>
+  <div class="checks">
+    <div class="eyebrow">CÂU HỎI CHỐT</div>
+    <div class="bigq">"Nếu tháo điểm này, đầu ra toàn dòng chảy có thực sự tăng không?"</div>
+    <ol>
+      <li>Công việc có thường xuyên tích lại trước điểm này?</li>
+      <li>Các bước phía sau có phải chờ nó?</li>
+      <li>Lượng cần xử lý có thường xuyên ≥ lực xử lý?</li>
+      <li>Khi tăng năng lực tại đây, đầu ra cuối cùng có tăng theo?</li>
+    </ol>
+    <div style="color:#e8dcc8;font-size:12px">Nếu không: đó là lãng phí/bất tiện, nhưng chưa chắc là điểm nghẽn.</div>
+  </div>
+ </div>
+
+ <h3 style="margin-top:20px">Ứng viên điểm nghẽn — xếp theo mức độ NHIỀU × NẶNG</h3>
+ <div class="candidates">
+  <div class="candidate"><strong>Ưu tiên 1 · Đĩa 5 — Chẩn đoán DT/KH</strong><br><small>100% thủ công bằng kinh nghiệm + Excel. GĐVH mất 15-20h/tháng gom số liệu thay vì đi thị trường và action.</small></div>
+  <div class="candidate"><strong>Ưu tiên 2 · Đĩa 3 — Onboarding NV mới</strong><br><small>54% NV mới nghỉ thử thách. Thiếu người kèm cặp → không đủ năng lực tư vấn hàng Nhật phức tạp → tốn chi phí tuyển dụng lại.</small></div>
+  <div class="candidate"><strong>Ưu tiên 3 · Đĩa 4 — Quá tải thanh toán</strong><br><small>Khách xếp hàng dài cuối tuần. Gây ức chế ở chặng cuối hành trình → giảm tỷ lệ retention.</small></div>
+  <div class="candidate"><strong>Ưu tiên 4 · Đĩa 2 — Chuỗi cung ứng TO</strong><br><small>Chờ duyệt TO 2-4 tiếng, xe giao 1-2 ngày. Hết hàng trên kệ → KH hỏi không có → mất DT trực tiếp.</small></div>
+  <div class="candidate"><strong>Ưu tiên 5 · Đĩa 1 — Bảo trì thiết bị</strong><br><small>Hỏng vặt thường xuyên (điều hòa, cửa cuốn, POS). Thủ tục duyệt mua mới kéo dài → tê liệt đón khách.</small></div>
+  <div class="candidate"><strong>Theo dõi · Đĩa 4 — Chẩn đoán KH churn</strong><br><small>Thiếu cơ chế nhận biết KH cũ đã mất. Data POS có nhưng chưa khai thác → không biết ai đang rời đi.</small></div>
+ </div>
+</section>
+
+<!-- ════════════════════════════════════════ 07. LIÊN THÔNG ════════════════════════════════════════ -->
+<section id="links">
+ <div class="sec-head"><div class="sec-no">07</div><h2>Liên thông giữa 5 Đĩa — Đĩa nào gãy, cả hệ thống chịu</h2></div>
+ <div class="link-grid">
+   <div class="link-row"><b>Đĩa 1 → Đĩa 4:</b> CH không sẵn sàng → KH vào thấy bẩn/thiếu → không hài lòng → không quay lại.</div>
+   <div class="link-row"><b>Đĩa 2 → Đĩa 4 + 5:</b> Hàng hết / trưng bày sai → KH không mua → DT giảm trực tiếp.</div>
+   <div class="link-row"><b>Đĩa 3 → Tất cả:</b> NV yếu → tư vấn kém → TBB thấp + KH bỏ + DT lệch. Đĩa 3 là "trục xoay" của toàn hệ thống.</div>
+   <div class="link-row"><b>Đĩa 4 → Đĩa 5:</b> KH không quay lại → DT giảm dần → năng suất giảm → chi phí / DT tăng.</div>
+   <div class="link-row"><b>Đĩa 5 → Đĩa 1-4:</b> BGĐ không nhìn đúng → không đầu tư / can thiệp đúng chỗ → vòng xoáy xuống.</div>
+ </div>
+</section>
+
+<!-- ════════════════════════════════════════ 08. DASHBOARD ════════════════════════════════════════ -->
+<section id="dashboard">
+ <div class="sec-head"><div class="sec-no">08</div><h2>Tầng điều khiển: đo ĐẦU RA, không chỉ đo hoạt động</h2></div>
+ <div class="kpi-grid">
+  <div class="kpi"><b>ĐĨA 1</b><small>% CH mở đúng giờ · % TB lỗi · Fill rate kệ đầu ngày · % bàn giao đủ</small></div>
+  <div class="kpi"><b>ĐĨA 2</b><small>Fill rate per ngành · % trưng bày đúng POG · % CTKM triển khai đúng · Số SP hết hạn sót</small></div>
+  <div class="kpi"><b>ĐĨA 3</b><small>% NV đào tạo đủ · SP/Bill · % NV mới nghỉ · Điểm năng lực TB per CH</small></div>
+  <div class="kpi"><b>ĐĨA 4</b><small>Thời gian chờ peak · Tỷ lệ KH quay lại · % KN xử lý &lt;30p · Điểm NPS</small></div>
+  <div class="kpi"><b>ĐĨA 5</b><small>DT/NV · % CH đạt target · Chi phí/DT · Thời gian ra báo cáo BGĐ</small></div>
+ </div>
+ <div class="cadence" style="margin-top:12px">
+  <div class="cad"><b>HẰNG NGÀY</b><br><small>Mở cửa đúng giờ, fill rate kệ, SP hết hạn, DT so target, bất thường.</small></div>
+  <div class="cad"><b>HẰNG TUẦN</b><br><small>Năng suất NV, SP/Bill, tồn kho, KH mới/cũ, CTKM triển khai.</small></div>
+  <div class="cad"><b>HẰNG THÁNG</b><br><small>P&L per CH, năng lực NV, chi phí, KPI per Đĩa, báo cáo BGĐ.</small></div>
+  <div class="cad"><b>HẰNG QUÝ</b><br><small>Đánh giá hệ thống, NV lên cấp, cải tiến quy trình, mở rộng chuỗi.</small></div>
+ </div>
+</section>
+
+<!-- ════════════════════════════════════════ 09. AI & CẢI TIẾN ════════════════════════════════════════ -->
+<section id="tobe">
+ <div class="sec-head"><div class="sec-no">09</div><h2>Sau khi 5L → 2N → kiểm chứng: AI hỗ trợ & thiết kế tương lai</h2></div>
+ <div class="tobe">
+  <h3>Giải pháp AI theo từng điểm nghẽn đã xác định</h3>
+  <div class="tobe-grid">
+   <div class="tobe-card"><b>01 · AI chẩn đoán DT real-time</b><br><small>Dashboard auto từ POS → nhìn DT gap per CH ngay → action nhanh 10x. Thay cho 15-20h/tháng gom Excel.</small></div>
+   <div class="tobe-card"><b>02 · AI onboarding NV mới</b><br><small>Checklist auto 2 tuần + quiz hàng ngày + tracking tiến bộ. Giảm 54% NV mới nghỉ xuống &lt;30%.</small></div>
+   <div class="tobe-card"><b>03 · AI chatbot tra cứu SP Nhật</b><br><small>NV hỏi công dụng/cách dùng SP ngay khi KH hỏi. Không cần nhớ hết 3000+ SKU tiếng Nhật.</small></div>
+   <div class="tobe-card"><b>04 · AI coaching cross-sell</b><br><small>Gợi ý SP liên quan theo giỏ hàng real-time. Nâng SP/Bill từ 2 → 3+.</small></div>
+   <div class="tobe-card"><b>05 · AI queue alert</b><br><small>Cảnh báo mở quầy phụ khi xếp hàng dài. Giảm ức chế KH giờ cao điểm.</small></div>
+   <div class="tobe-card"><b>06 · AI chẩn đoán KH churn</b><br><small>Phát hiện KH cũ đang rời đi → chăm sóc proactive. Tăng retention.</small></div>
+  </div>
+  <div class="note" style="margin-top:14px;border-left-color:#5b7c6f"><b>Tiên quyết:</b> Data infrastructure (DWH + Haravan API + POS sync) — không có data = AI không giúp. Phải xây nền trước khi gắn AI.</div>
+ </div>
+</section>
+
+<div class="source">
+ <b>Ghi chú:</b> Bản này áp đúng phương pháp "Nhìn thấy trước khi cải tiến" — KHÁCH HÀNG → ĐĨA (đặt tên theo ĐẦU RA) → DÒNG CHẢY → 5L → 2N → KIỂM CHỨNG ĐIỂM NGHẼN → AI HỖ TRỢ. Sakuko · Vận hành HN Offline · 22-23 CH · GĐVH: Lường Thị Thùy · 2024.
+</div>
+</main>
+</body></html>
