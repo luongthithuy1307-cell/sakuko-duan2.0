@@ -102,6 +102,13 @@ h3{margin:0 0 8px}
 .tobe-card{background:#fff;border:1px solid #c8d8e8;padding:14px}
 .link-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:14px}
 .link-row{background:#fff;border-left:4px solid var(--rust);padding:12px 16px;font-size:13px}
+.score-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+.score-table th{background:#1a3c6e;color:#fff;padding:10px 8px;text-align:center;font-weight:700}
+.score-table td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.score-table tr:nth-child(even){background:#f5f0f6}
+.score-table .sc{text-align:center;font-weight:700;font-size:15px}
+.score-table .sc-high{color:#c2185b;font-size:18px}
+.score-table .cost{color:#c2185b;font-weight:700}
 .source{font-size:11px;color:#7b6b8a;border-top:1px solid var(--line);padding-top:18px;margin-top:45px}
 @media(max-width:1050px){
  .dishes,.steps,.kpi-grid,.candidates{grid-template-columns:repeat(2,1fr)}
@@ -477,17 +484,62 @@ h3{margin:0 0 8px}
   </div>
  </div>
 
- <h3 style="margin-top:20px">Ứng viên điểm nghẽn — xếp theo mức độ NHIỀU × NẶNG</h3>
- <div class="candidates">
-  <div class="candidate" style="border-color:#c2185b;border-width:2px"><strong>Ưu tiên 1 · Đĩa 3 — Hội nhập NV mới</strong><br><small>54% NV mới nghỉ thử thách. Chưa có checklist đồng hành 3-7-30 ngày. Thiếu người kèm cặp → không đủ năng lực → tốn chi phí tuyển dụng lại. <b style="color:#c2185b">→ CẦN AI: Bảng kiểm tự động + theo dõi tiến bộ từng NV mới.</b></small></div>
-  <div class="candidate" style="border-color:#c2185b;border-width:2px"><strong>Ưu tiên 2 · Đĩa 3 — Đào tạo kiến thức hàng Nhật</strong><br><small>NV học module hàng tháng, có kết quả thi. Nhưng chưa đo kiến thức đó áp dụng thực tế tại điểm bán ra sao. Học xong ≠ biết tư vấn. <b style="color:#c2185b">→ CẦN AI: Trắc nghiệm thực tế + AI tra cứu SP Nhật hỗ trợ NV ngay tại quầy.</b></small></div>
-  <div class="candidate" style="border-color:#c2185b;border-width:2px"><strong>Ưu tiên 3 · Đĩa 3 — Áp dụng kiến thức vào bán hàng thực tế</strong><br><small>Có đo TBB + SP/Bill từng CH. Nhưng hiệu quả kích bill bằng 1-2 SP cụ thể → chưa đo rõ ràng. NV biết SP nhưng chưa biết cách bán chéo. <b style="color:#c2185b">→ CẦN AI: Gợi ý bán chéo theo giỏ hàng + đo hiệu quả từng kịch bản kích bill.</b></small></div>
-  <div class="candidate"><strong>Ưu tiên 4 · Đĩa 5 — Chẩn đoán DT/KH</strong><br><small>100% thủ công bằng kinh nghiệm + Excel. GĐVH mất 15-20h/tháng gom số liệu thay vì đi thị trường và hành động. <b style="color:#c2185b">→ CẦN AI: Bảng điều khiển tự động từ POS.</b></small></div>
-  <div class="candidate"><strong>Ưu tiên 5 · Đĩa 4 — Quá tải thanh toán</strong><br><small>Khách xếp hàng dài cuối tuần ~5-6 phút chờ. Gây ức chế ở chặng cuối hành trình → giảm tỷ lệ giữ chân KH.</small></div>
-  <div class="candidate"><strong>Ưu tiên 6 · Đĩa 2 — Chuỗi cung ứng TO</strong><br><small>Chờ duyệt TO 2-4 tiếng, xe giao 1-2 ngày. Hết hàng trên kệ → KH hỏi không có → mất DT trực tiếp.</small></div>
-  <div class="candidate"><strong>Theo dõi · Đĩa 1 — Bảo trì thiết bị</strong><br><small>Hỏng vặt thường xuyên (điều hòa, cửa cuốn, POS). Thủ tục duyệt mua mới kéo dài → tê liệt đón khách.</small></div>
-  <div class="candidate"><strong>Theo dõi · Đĩa 4 — Chẩn đoán KH rời bỏ</strong><br><small>Thiếu cơ chế nhận biết KH cũ đã mất. Dữ liệu POS có nhưng chưa khai thác → không biết ai đang rời đi.</small></div>
- </div>
+ <h3 style="margin-top:20px">Chấm điểm nghẽn — NHIỀU × NẶNG (thang 1-5) + quy ra TÁC ĐỘNG TÀI CHÍNH</h3>
+ <p style="font-size:13px;color:#7b6b8a;margin:6px 0 14px"><b>NHIỀU</b> = tần suất xảy ra (1 hiếm – 5 liên tục) · <b>NẶNG</b> = mức ảnh hưởng lên DT/vận hành (1 nhẹ – 5 tê liệt) · <b>ĐIỂM = NHIỀU × NẶNG</b> (tối đa 25)</p>
+
+ <table class="score-table">
+  <tr><th>Điểm nghẽn</th><th>NHIỀU<br>(1-5)</th><th>NẶNG<br>(1-5)</th><th>ĐIỂM<br>N×N</th><th>TÁC ĐỘNG TÀI CHÍNH ƯỚC TÍNH/THÁNG</th><th>AI giải pháp</th></tr>
+  <tr style="background:#fce4ec">
+    <td><b>Đĩa 3 — Hội nhập NV mới</b><br><small>54% NV mới nghỉ thử thách. Chưa có checklist 3-7-30 ngày.</small></td>
+    <td class="sc sc-high">5</td><td class="sc sc-high">5</td><td class="sc sc-high">25</td>
+    <td><span class="cost">~55-75 triệu/tháng</span><br><small>Chi phí tuyển lại ~3-5 triệu/NV × ~15 NV nghỉ/tháng (54% của ~28 NV mới). Chưa tính mất DT do thiếu người bán.</small></td>
+    <td><small>AI bảng kiểm 3-7-30 ngày + theo dõi tiến bộ → mục tiêu giảm từ 54% xuống &lt;30%</small></td>
+  </tr>
+  <tr style="background:#fce4ec">
+    <td><b>Đĩa 3 — Đào tạo kiến thức hàng Nhật</b><br><small>Học online có thi. Chưa đo áp dụng thực tế tại điểm bán.</small></td>
+    <td class="sc sc-high">5</td><td class="sc sc-high">4</td><td class="sc sc-high">20</td>
+    <td><span class="cost">~30-50 triệu/tháng</span><br><small>NV không tư vấn được → KH không mua → mất ~1.5-2.5 triệu DT/CH/tháng × 22 CH. Học xong ≠ bán được.</small></td>
+    <td><small>AI tra cứu SP Nhật tại quầy + trắc nghiệm thực tế → đo % NV tư vấn đúng SP</small></td>
+  </tr>
+  <tr style="background:#fce4ec">
+    <td><b>Đĩa 3 — Áp dụng vào bán hàng thực tế</b><br><small>Có TBB + SP/Bill. Chưa đo hiệu quả kích bill cụ thể.</small></td>
+    <td class="sc sc-high">5</td><td class="sc sc-high">4</td><td class="sc sc-high">20</td>
+    <td><span class="cost">~40-60 triệu/tháng</span><br><small>SP/Bill = 2, nếu nâng lên 3 → tăng ~50% giá trị/hóa đơn. Với ~2000 bill/ngày toàn chuỗi → DT bỏ lỡ rất lớn.</small></td>
+    <td><small>AI gợi ý bán chéo theo giỏ hàng + đo tỷ lệ kích bill thành công</small></td>
+  </tr>
+  <tr>
+    <td><b>Đĩa 5 — Chẩn đoán DT/KH</b><br><small>100% thủ công. GĐVH mất 15-20h/tháng gom Excel.</small></td>
+    <td class="sc">4</td><td class="sc">5</td><td class="sc sc-high">20</td>
+    <td><span class="cost">~20-30 triệu/tháng</span><br><small>15-20h GĐVH gom số ≈ lương ~15 triệu + mất cơ hội đi thị trường phát hiện vấn đề sớm → DT lệch không can thiệp kịp.</small></td>
+    <td><small>AI bảng điều khiển DT tự động từ POS → hành động nhanh 10 lần</small></td>
+  </tr>
+  <tr>
+    <td><b>Đĩa 4 — Quá tải thanh toán</b><br><small>Chờ ~5-6 phút giờ cao điểm cuối tuần.</small></td>
+    <td class="sc">3</td><td class="sc">4</td><td class="sc">12</td>
+    <td><span class="cost">~10-20 triệu/tháng</span><br><small>KH bỏ giỏ/giảm tần suất quay lại. Ước ~2-3% KH rời do chờ lâu × DT trung bình/KH.</small></td>
+    <td><small>AI cảnh báo mở quầy phụ khi xếp hàng dài</small></td>
+  </tr>
+  <tr>
+    <td><b>Đĩa 2 — Chuỗi cung ứng TO</b><br><small>Chờ duyệt 2-4 tiếng, xe giao 1-2 ngày. Hết hàng trên kệ.</small></td>
+    <td class="sc">3</td><td class="sc">3</td><td class="sc">9</td>
+    <td><span class="cost">~15-25 triệu/tháng</span><br><small>Mã hot trống kệ → mất DT trực tiếp. Ước mất ~0.5-1 triệu/CH/tháng × 22 CH do hết hàng mã trọng điểm.</small></td>
+    <td><small>Tối ưu quy trình TO + theo dõi tỷ lệ lấp đầy mã hot</small></td>
+  </tr>
+  <tr>
+    <td><b>Đĩa 1 — Bảo trì thiết bị</b><br><small>Hỏng vặt thường xuyên. Thủ tục duyệt mua kéo dài.</small></td>
+    <td class="sc">2</td><td class="sc">3</td><td class="sc">6</td>
+    <td><small>~5-10 triệu/tháng<br>Chi phí sửa chữa khẩn + mất DT khi TB tê liệt (điều hòa, POS).</small></td>
+    <td><small>Theo dõi — quy trình bảo trì định kỳ</small></td>
+  </tr>
+  <tr>
+    <td><b>Đĩa 4 — Chẩn đoán KH rời bỏ</b><br><small>Dữ liệu POS có nhưng chưa khai thác.</small></td>
+    <td class="sc">2</td><td class="sc">4</td><td class="sc">8</td>
+    <td><small>Chưa đo được — cần dữ liệu POS phân tích mới biết quy mô KH rời.</small></td>
+    <td><small>Theo dõi — AI chẩn đoán KH rời bỏ khi có hạ tầng dữ liệu</small></td>
+  </tr>
+ </table>
+
+ <div class="note" style="margin-top:14px;border-left-color:#c2185b"><b>Tổng tác động tài chính ước tính:</b> <span class="cost" style="font-size:16px">~175-270 triệu/tháng</span> — trong đó <b>Đĩa 3 (Nhân sự)</b> chiếm <b>~125-185 triệu/tháng</b> (>70%). Đây là trục xoay: NV ở lại → đào tạo được → bán được → DT tăng → chi phí/DT giảm.</div>
 </section>
 
 <!-- ════════════════════════════════════════ 06. LIÊN THÔNG ════════════════════════════════════════ -->
